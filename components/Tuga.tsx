@@ -33,11 +33,6 @@ export function Tuga({ pose = 'padrao', size = 160 }: Props) {
       <Ellipse cx="150" cy="164" rx="26" ry="12" fill={PELE} transform="rotate(20 150 164)" />
       <Ellipse cx="40" cy="110" rx="30" ry="13" fill={PELE} transform="rotate(-35 40 110)" />
 
-      {/* nadadeira da frente levantada (comemora) fica atrás do casco */}
-      {pose === 'comemora' && (
-        <Ellipse cx="170" cy="70" rx="28" ry="12" fill={PELE} transform="rotate(-58 170 70)" />
-      )}
-
       {/* casco */}
       <Path d="M32 148 A80 72 0 0 1 192 148 Z" fill={cores.tugaCasco} />
       <Path d="M112 84 L136 100 L130 128 L94 128 L88 100 Z" fill="none" stroke={cores.tugaLinha} strokeWidth={4} />
@@ -48,6 +43,9 @@ export function Tuga({ pose = 'padrao', size = 160 }: Props) {
         strokeLinecap="round"
       />
       <Rect x="28" y="142" width="168" height="14" rx="7" fill={cores.areia} />
+
+      {/* nadadeira da frente levantada, acenando (comemora) */}
+      {pose === 'comemora' && <Ellipse cx="160" cy="70" rx="30" ry="12" fill={PELE} transform="rotate(68 160 70)" />}
 
       {/* cabeça */}
       <Circle cx="200" cy="112" r="28" fill={PELE} />
@@ -106,20 +104,20 @@ export function Tuga({ pose = 'padrao', size = 160 }: Props) {
       {pose === 'acolhe' && (
         <G>
           {/* boia branca e coral */}
-          <Circle cx="178" cy="160" r="22" fill="none" stroke="#FFFFFF" strokeWidth={12} />
+          <Circle cx="182" cy="154" r="24" fill="none" stroke="#FFFFFF" strokeWidth={13} />
           <Circle
-            cx="178"
-            cy="160"
-            r="22"
+            cx="182"
+            cy="154"
+            r="24"
             fill="none"
             stroke={cores.coral}
-            strokeWidth={12}
-            strokeDasharray="17.3 17.3"
-            strokeDashoffset={8}
+            strokeWidth={13}
+            strokeDasharray="18.85 18.85"
+            strokeDashoffset={9}
           />
-          <Circle cx="178" cy="160" r="28" fill="none" stroke={cores.linha} strokeWidth={1} />
+          <Circle cx="182" cy="154" r="30.5" fill="none" stroke={cores.linha} strokeWidth={1} />
           {/* nadadeira segurando a boia */}
-          <Ellipse cx="162" cy="146" rx="22" ry="10" fill={PELE} transform="rotate(30 162 146)" />
+          <Ellipse cx="160" cy="140" rx="22" ry="10" fill={PELE} transform="rotate(25 160 140)" />
         </G>
       )}
     </Svg>

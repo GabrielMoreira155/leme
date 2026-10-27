@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { cores } from '@/theme';
 
@@ -196,6 +197,10 @@ function Tracos({ nome }: { nome: NomeIcone }) {
   }
 }
 
+// Ícone é decorativo: o rótulo fica no botão que o contém.
+const ESCONDER_DO_LEITOR: object =
+  Platform.OS === 'web' ? { 'aria-hidden': true } : { accessibilityElementsHidden: true, importantForAccessibility: 'no-hide-descendants' };
+
 export function Icone({ nome, size = 24, cor = cores.oceano }: Props) {
   return (
     <Svg
@@ -207,8 +212,7 @@ export function Icone({ nome, size = 24, cor = cores.oceano }: Props) {
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
-      accessibilityElementsHidden
-      importantForAccessibility="no"
+      {...ESCONDER_DO_LEITOR}
     >
       <Tracos nome={nome} />
     </Svg>

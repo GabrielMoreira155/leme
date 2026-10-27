@@ -125,7 +125,7 @@ export default function Fissura() {
         etapa === 'intro' ? (
           <Botao titulo="Começar" grande onPress={comecar} />
         ) : etapa === 'respira' ? (
-          <Botao titulo="Já estou melhor, seguir" variante="fantasma" onPress={terminarRespiracao} style={{ borderColor: 'transparent' }} />
+          <Botao titulo="Já estou melhor, seguir" variante="contornoClaro" onPress={terminarRespiracao} />
         ) : etapa === 'porque' ? (
           <Botao titulo="Seguir" onPress={() => setEtapa('distrair')} />
         ) : etapa === 'distrair' ? (
@@ -168,7 +168,9 @@ export default function Fissura() {
           <View style={estilos.palco}>
             <Animated.View style={[estilos.circulo, { transform: [{ scale: escala }] }]} />
             <Animated.View style={[estilos.circuloInterno, { transform: [{ scale: escala }] }]} />
-            <Tuga pose="respira" size={150} />
+            <View style={{ zIndex: 1 }}>
+              <Tuga pose="respira" size={150} />
+            </View>
           </View>
           <Texto style={estilos.fase} accessibilityLiveRegion="polite">
             {FASES[fase].nome}

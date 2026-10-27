@@ -2,7 +2,7 @@ import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { cores, fontes, raio, TOQUE_MIN } from '@/theme';
 import { Icone, NomeIcone } from './Icone';
 
-type Variante = 'primario' | 'oceano' | 'contorno' | 'fantasma' | 'claro';
+type Variante = 'primario' | 'oceano' | 'contorno' | 'contornoClaro' | 'fantasma' | 'claro';
 
 type Props = {
   titulo: string;
@@ -21,6 +21,7 @@ const VARIANTES: Record<Variante, { fundo: string; texto: string; borda: string 
   primario: { fundo: cores.coral, texto: cores.textoCoral, borda: cores.coral },
   oceano: { fundo: cores.oceano, texto: cores.branco, borda: cores.oceano },
   contorno: { fundo: 'transparent', texto: cores.oceano, borda: cores.oceano },
+  contornoClaro: { fundo: 'transparent', texto: cores.branco, borda: 'rgba(255,255,255,0.6)' },
   fantasma: { fundo: 'transparent', texto: cores.mare, borda: 'transparent' },
   claro: { fundo: cores.branco, texto: cores.oceano, borda: cores.branco },
 };

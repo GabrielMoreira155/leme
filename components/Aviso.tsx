@@ -19,7 +19,7 @@ export function Aviso() {
       accessibilityLiveRegion="polite"
       style={[
         estilos.aviso,
-        { opacity: anim, transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [20, 0] }) }] },
+        { opacity: anim, transform: [{ translateY: anim.interpolate({ inputRange: [0, 1], outputRange: [-20, 0] }) }] },
       ]}
     >
       <Icone nome="estrela" size={18} cor={cores.oceano} />
@@ -31,7 +31,7 @@ export function Aviso() {
 const estilos = StyleSheet.create({
   aviso: {
     position: 'absolute',
-    bottom: 96,
+    top: 64,
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',

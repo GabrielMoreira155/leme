@@ -15,7 +15,7 @@ export const CUIDADOS: Cuidado[] = [
   {
     id: 'sono',
     nome: 'Dormir melhor',
-    porque: 'acordar descansado',
+    porque: 'acordar com mais descanso',
     missao: { id: 'cui-sono', texto: 'Preparar o quarto para dormir: luz baixa e celular longe' },
   },
   {
