@@ -26,7 +26,7 @@ node scripts/gerar-sons.js # regera os sons placeholder
 
 Versões online:
 
-- Vercel: https://leme-mauve.vercel.app (atualizar com `npx vercel deploy --prod`, a build é configurada no `vercel.json`)
+- Vercel: https://leme-mauve.vercel.app (publica sozinha a cada push no `master`; a build é configurada no `vercel.json`)
 - GitHub Pages: https://gabrielmoreira155.github.io/leme/ (atualizar com `npm run publicar`)
 
 ## Stack
