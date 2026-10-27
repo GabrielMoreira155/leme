@@ -20,8 +20,11 @@ Outros comandos úteis:
 
 ```bash
 npm run typecheck          # checagem de tipos
+npm run publicar           # gera a versão web e publica no GitHub Pages
 node scripts/gerar-sons.js # regera os sons placeholder
 ```
+
+Versão online: https://gabrielmoreira155.github.io/leme/
 
 ## Stack
 
