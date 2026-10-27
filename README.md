@@ -24,7 +24,10 @@ npm run publicar           # gera a versão web e publica no GitHub Pages
 node scripts/gerar-sons.js # regera os sons placeholder
 ```
 
-Versão online: https://gabrielmoreira155.github.io/leme/
+Versões online:
+
+- Vercel: https://leme-mauve.vercel.app (atualizar com `npx vercel deploy --prod`, a build é configurada no `vercel.json`)
+- GitHub Pages: https://gabrielmoreira155.github.io/leme/ (atualizar com `npm run publicar`)
 
 ## Stack
 
