@@ -52,6 +52,7 @@ export default function Perfil() {
   const [verDados, setVerDados] = useState(false);
   const [novoPin, setNovoPin] = useState('');
   const [demo, setDemo] = useState(false);
+  const [toques, setToques] = useState(0);
   const { ficha, plano } = estado;
   const { nivel } = nivelXP(estado.xp);
 
@@ -86,7 +87,7 @@ export default function Perfil() {
   const guardado = [
     ficha && `Apelido: ${ficha.apelido} · idade ${ficha.faixaIdade}`,
     ficha && `Tema: ${temaPorId(ficha.tema).nome}`,
-    `${estado.diasCuidados.length} dias cuidados · ${estado.xp} XP`,
+    `${estado.diasCuidados.length} ${estado.diasCuidados.length === 1 ? 'dia cuidado' : 'dias cuidados'} · ${estado.xp} XP`,
     `${estado.humor.length} check-ins de humor · ${estado.tropecos.length} tropeços anotados`,
     `${estado.diario.length} entradas no diário · ${estado.cartas.length} cartas`,
     `${estado.sessoes.length} agendamentos`,
@@ -244,8 +245,18 @@ export default function Perfil() {
         </View>
       </Cartao>
 
-      {/* Botão escondido: segurar a versão abre as ferramentas de apresentação */}
-      <Pressable onLongPress={() => setDemo(!demo)} delayLongPress={800} accessibilityLabel="Versão do aplicativo" style={{ alignItems: 'center', paddingVertical: espaco.md }}>
+      {/* Botão escondido: segurar a versão (ou tocar 5 vezes) abre as ferramentas de apresentação */}
+      <Pressable
+        onLongPress={() => setDemo(!demo)}
+        onPress={() => {
+          const n = toques + 1;
+          setToques(n % 5);
+          if (n === 5) setDemo(!demo);
+        }}
+        delayLongPress={800}
+        accessibilityLabel="Versão do aplicativo"
+        style={{ alignItems: 'center', paddingVertical: espaco.md }}
+      >
         <Texto v="apoio" style={{ fontSize: 12 }}>
           Leme · protótipo v0.1
         </Texto>

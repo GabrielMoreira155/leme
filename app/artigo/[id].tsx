@@ -1,4 +1,5 @@
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { voltar } from '@/lib/navegar';
+import { Redirect, useLocalSearchParams } from 'expo-router';
 import { View } from 'react-native';
 import { Botao, Cabecalho, Tela, Texto } from '@/components';
 import { ARTIGOS, RODAPE_ARTIGOS } from '@/data/artigos';
@@ -20,7 +21,7 @@ export default function ArtigoTela() {
       atualizar((e) => ({ ...e, artigosLidos: [...e.artigosLidos, artigo!.id] }));
       ganharXP(XP_ARTIGO, 'leitura');
     }
-    router.back();
+    voltar('/artigos');
   }
 
   return (

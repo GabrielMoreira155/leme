@@ -1,3 +1,4 @@
+import { voltar as voltarTela } from '@/lib/navegar';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
@@ -78,7 +79,7 @@ export default function FichaTela() {
   }
 
   function voltar() {
-    if (passo === 0) return router.back();
+    if (passo === 0) return voltarTela('/consentimento');
     setPasso(passo - 1);
   }
 

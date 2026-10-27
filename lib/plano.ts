@@ -9,7 +9,8 @@
  *   3: 7 dias livres seguidos
  *
  * Degrau inicial pela frequência: quanto mais frequente o hábito,
- * mais leve o começo. A meta sobe um degrau por semana cumprida e
+ * mais leve o começo (várias vezes ao dia: 0, quase todo dia: 1,
+ * algumas vezes por semana: 2, em fases: 3). Exceção: álcool começa sempre no 0. A meta sobe um degrau por semana cumprida e
  * desce um sozinha se a semana não fechar, sem castigo nenhum.
  */
 
@@ -77,7 +78,9 @@ export function gerarPlano(ficha: Ficha): Plano {
   const risco = ficha.seguranca === 'as-vezes' || ficha.seguranca === 'sim-agora';
   return {
     nivel,
-    degrau: degrauInicial(ficha.frequencia),
+    // Álcool sempre começa em "menos do que o normal": parar de uma vez pode ser perigoso
+    // para quem bebe muito, então a redução é gradual e com acompanhamento.
+    degrau: ficha.tema === 'alcool' ? 0 : degrauInicial(ficha.frequencia),
     semana: 0,
     convitePsicologo: nivel === 'pesado' || risco,
     avisoAlcool: ficha.tema === 'alcool',

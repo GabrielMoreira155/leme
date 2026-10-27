@@ -18,7 +18,7 @@ export function Marcar({ marcado, aoMudar, titulo, detalhe, etiqueta }: Props) {
       onPress={() => aoMudar(!marcado)}
       accessibilityRole="checkbox"
       accessibilityState={{ checked: marcado }}
-      accessibilityLabel={`${titulo}${etiqueta ? `, ${etiqueta}` : ''}`}
+      accessibilityLabel={etiqueta ? `${etiqueta}: ${titulo}` : titulo}
       style={({ pressed }) => [estilos.linha, marcado && estilos.linhaMarcada, pressed && { opacity: 0.9 }]}
     >
       <View style={[estilos.caixa, marcado && estilos.caixaMarcada]}>{marcado && <Icone nome="check" size={18} cor={cores.branco} />}</View>

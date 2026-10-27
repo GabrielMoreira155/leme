@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { voltar as voltarTela } from '@/lib/navegar';
 import { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { cores, espaco, fontes } from '@/theme';
@@ -22,7 +22,7 @@ export function Cabecalho({ titulo, voltar = true, aoVoltar, direita, claro }: P
             icone="voltar"
             rotulo="Voltar"
             cor={cor}
-            onPress={aoVoltar ?? (() => (router.canGoBack() ? router.back() : router.replace('/')))}
+            onPress={aoVoltar ?? (() => voltarTela())}
           />
         )}
       </View>

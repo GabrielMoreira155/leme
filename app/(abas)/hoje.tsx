@@ -57,7 +57,7 @@ export default function Hoje() {
   const humorHoje = estado.humor.find((h) => h.data === hojeStr)?.valor;
   const ganho = tema.ganho.base + tema.ganho.porDia * estado.diasCuidados.length;
 
-  function concluirMissao(id: string, texto: string) {
+  function concluirMissao(id: string) {
     if (feitas.includes(id)) return;
     atualizar((e) => ({ ...e, missoes: { data: hojeStr, feitas: [...e.missoes.feitas, id] } }));
     vibrarSucesso();
@@ -211,12 +211,12 @@ export default function Hoje() {
           <ItemMissao
             texto={MISSAO_RECOMECO.texto}
             feita={feitas.includes(MISSAO_RECOMECO.id)}
-            onPress={() => concluirMissao(MISSAO_RECOMECO.id, MISSAO_RECOMECO.texto)}
+            onPress={() => concluirMissao(MISSAO_RECOMECO.id)}
             destaque
           />
         )}
         {missoes.map((m) => (
-          <ItemMissao key={m.id} texto={m.texto} feita={feitas.includes(m.id)} onPress={() => concluirMissao(m.id, m.texto)} />
+          <ItemMissao key={m.id} texto={m.texto} feita={feitas.includes(m.id)} onPress={() => concluirMissao(m.id)} />
         ))}
       </Cartao>
 

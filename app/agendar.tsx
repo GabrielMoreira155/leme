@@ -1,4 +1,5 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { voltar } from '@/lib/navegar';
+import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { Botao, Cabecalho, Cartao, Chip, Icone, Tela, Texto, Tuga } from '@/components';
@@ -50,7 +51,7 @@ export default function Agendar() {
 
   if (feito) {
     return (
-      <Tela topo={<Cabecalho voltar={false} />} rodape={<Botao titulo="Voltar para Sessões" onPress={() => router.back()} />}>
+      <Tela topo={<Cabecalho voltar={false} />} rodape={<Botao titulo="Voltar para Sessões" onPress={() => voltar('/sessoes')} />}>
         <View style={{ alignItems: 'center', gap: espaco.lg, marginTop: espaco.xl }}>
           <Tuga pose="padrao" size={180} />
           <Texto v="h1" style={{ textAlign: 'center' }}>

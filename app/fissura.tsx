@@ -1,3 +1,4 @@
+import { voltar } from '@/lib/navegar';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Platform, StyleSheet, View } from 'react-native';
@@ -103,7 +104,7 @@ export default function Fissura() {
     setEtapa('fim');
   }
 
-  const sair = () => (router.canGoBack() ? router.back() : router.replace('/hoje'));
+  const sair = () => voltar('/hoje');
   const escuro = etapa === 'respira' || etapa === 'intro';
   const fundo = escuro ? cores.oceano : cores.areia;
 

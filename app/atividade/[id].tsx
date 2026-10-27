@@ -1,4 +1,5 @@
-import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import { voltar } from '@/lib/navegar';
+import { Redirect, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { BarraProgresso, Botao, Cabecalho, Cartao, Chip, Icone, Tela, Texto, Tuga } from '@/components';
@@ -23,7 +24,7 @@ export default function AtividadeTela() {
 
   if (concluida) {
     return (
-      <Tela topo={<Cabecalho titulo={atividade.titulo} />} rodape={<Botao titulo="Voltar" onPress={() => router.back()} />}>
+      <Tela topo={<Cabecalho titulo={atividade.titulo} />} rodape={<Botao titulo="Voltar" onPress={() => voltar('/atividades')} />}>
         <View style={{ alignItems: 'center', gap: espaco.lg, marginTop: espaco.xxl }}>
           <Tuga pose="comemora" size={200} />
           <Texto v="h1" style={{ textAlign: 'center' }}>

@@ -1,3 +1,4 @@
+import { voltar } from '@/lib/navegar';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Linking, View } from 'react-native';
@@ -36,12 +37,12 @@ export default function Apoio() {
         daFicha ? (
           <Botao titulo="Continuar para o meu plano" variante="contorno" onPress={() => router.replace('/plano')} />
         ) : (
-          <Botao titulo="Voltar" variante="contorno" onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))} />
+          <Botao titulo="Voltar" variante="contorno" onPress={() => voltar()} />
         )
       }
     >
       <Texto v="h1" style={{ marginTop: daFicha ? espaco.lg : 0 }}>
-        Obrigado por contar. Você não precisa passar por isso sozinho.
+        Obrigado por contar. Você não precisa passar por isso só.
       </Texto>
       <Texto v="corpo">
         O que você está sentindo importa. Agora, o mais importante é falar com alguém. Tem gente preparada para ouvir, de graça, a qualquer hora.

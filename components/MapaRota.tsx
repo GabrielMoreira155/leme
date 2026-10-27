@@ -42,7 +42,7 @@ export function MapaRota({ atual, claro }: Props) {
                 ]}
               >
                 <Icone
-                  nome={bloqueado ? 'cadeado' : feito ? 'check' : 'porto'}
+                  nome={bloqueado ? 'cadeado' : feito ? 'check' : 'farol'}
                   size={20}
                   cor={bloqueado ? (claro ? '#9FB3C6' : cores.neblina) : ativo ? cores.oceano : cores.branco}
                 />
