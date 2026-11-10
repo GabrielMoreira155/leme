@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Linking, Platform } from 'react-native';
+import { criarEstadoDemo, DEMOS, NomeDemo } from './demo';
+import type { RespostaDia } from './ganhos';
 import type { Ficha, Plano } from './plano';
 
 // Todo o estado do protótipo vive no aparelho (AsyncStorage). Não existe backend.
@@ -11,6 +13,21 @@ export const ENERGIA_MAX = 5;
 export const RECARGA_MS = 2 * 60 * 60 * 1000; // 2 horas
 
 export type Humor = 'bem' | 'mais-ou-menos' | 'dificil';
+
+export type TipoDestino = 'guardar' | 'conta' | 'presente' | 'viagem' | 'outro';
+export type Destino = { tipo: TipoDestino; texto?: string; alvo?: number };
+
+// Base dos ganhos, destino do dinheiro e respostas de "Como foi hoje". Dado pessoal: fica só no
+// aparelho, aparece em "O que está guardado" e é apagado no "Apagar tudo" e no reset.
+export type Ganhos = {
+  /** Respostas da tela "Calcular meus ganhos" (ex.: { valor: 150 } ou { vezes: 3, porVez: 40 }). */
+  respostas: Record<string, number> | null;
+  /** Para qual tema a base foi informada (ver data/ganhos.ts). */
+  chave: string | null;
+  /** Escolheu "Prefiro não informar". */
+  recusou: boolean;
+  destino: Destino | null;
+};
 
 export type Estado = {
   consentimento: { plano: boolean; melhorias: boolean; em: string } | null;
@@ -31,6 +48,9 @@ export type Estado = {
   cartas: { em: string; abreEm: string; texto: string }[];
   sessoes: { id: string; tipo: string; com: string; horario: string; em: string }[];
   fissurasAtravessadas: number;
+  ganhos: Ganhos;
+  /** "Como foi hoje com ...?" por data (AAAA-MM-DD). */
+  registroDiario: Record<string, RespostaDia>;
   /** Textos do "Outro" que o app não reconheceu. Só no aparelho e só com o aceite opcional. */
   textosNaoReconhecidos: { texto: string; em: string }[];
   somLigado: boolean;
@@ -62,6 +82,8 @@ export const ESTADO_INICIAL: Estado = {
   sessoes: [],
   fissurasAtravessadas: 0,
   textosNaoReconhecidos: [],
+  ganhos: { respostas: null, chave: null, recusou: false, destino: null },
+  registroDiario: {},
   somLigado: false, // som desligado por padrão fora da respiração
   jaRespirou: false,
   modoDiscreto: false,
@@ -153,19 +175,21 @@ function normalizar(e: Estado): Estado {
   return r;
 }
 
-// Lê o ?reset=1 da URL de abertura. No navegador, também tira o parâmetro da barra
-// para um recarregar não apagar tudo de novo.
-async function pedidoDeReset(): Promise<boolean> {
+// Lê um parâmetro da URL de abertura (?reset=1, ?demo=apostas). No navegador, também tira o
+// parâmetro da barra para um recarregar não repetir a ação.
+async function parametroDeAbertura(nome: string): Promise<string | null> {
   if (Platform.OS === 'web') {
-    if (typeof window === 'undefined') return false;
+    if (typeof window === 'undefined') return null;
     const url = new URL(window.location.href);
-    if (url.searchParams.get('reset') !== '1') return false;
-    url.searchParams.delete('reset');
+    const valor = url.searchParams.get(nome);
+    if (valor === null) return null;
+    url.searchParams.delete(nome);
     window.history.replaceState(null, '', url.pathname + url.search + url.hash);
-    return true;
+    return valor;
   }
   const inicial = await Linking.getInitialURL();
-  return !!inicial && /[?&]reset=1(&|$)/.test(inicial);
+  const achado = inicial?.match(new RegExp(`[?&]${nome}=([^&#]*)`));
+  return achado ? decodeURIComponent(achado[1]) : null;
 }
 
 export function EstadoProvider({ children }: { children: ReactNode }) {
@@ -178,11 +202,17 @@ export function EstadoProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        // Atalho para apresentações: abrir o app com ?reset=1 começa do zero.
-        if (await pedidoDeReset()) {
-          await AsyncStorage.clear();
+        // Atalhos para apresentações:
+        //   ?reset=1        começa do zero
+        //   ?demo=apostas   (ou celular, outro) começa com ficha, base e alguns dias de histórico
+        const reset = (await parametroDeAbertura('reset')) === '1';
+        const demo = await parametroDeAbertura('demo');
+        if (reset || demo) await AsyncStorage.clear();
+        if (demo && (DEMOS as string[]).includes(demo)) {
+          setEstado(normalizar(criarEstadoDemo(demo as NomeDemo, ESTADO_INICIAL)));
           return;
         }
+        if (reset) return;
         const txt = await AsyncStorage.getItem(CHAVE);
         if (txt) setEstado(normalizar({ ...ESTADO_INICIAL, ...JSON.parse(txt) }));
       } catch {

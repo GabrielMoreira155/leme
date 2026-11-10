@@ -6,6 +6,8 @@ import { ENERGIA_MAX, nivelXP, useEstado } from '@/lib/estado';
 import { NOME_ROTA } from '@/lib/nivel';
 import { ajustarMeta } from '@/lib/plano';
 import { temaDaFicha } from '@/lib/tema';
+import { configGanho, descreverBase } from '@/data/ganhos';
+import { formatarReais } from '@/lib/ganhos';
 import { cores, espaco, fontes, raio } from '@/theme';
 
 function Linha({ icone, titulo, detalhe, valor, aoMudar }: { icone: NomeIcone; titulo: string; detalhe?: string; valor: boolean; aoMudar: (v: boolean) => void }) {
@@ -97,6 +99,13 @@ export default function Perfil() {
     mostrarAviso(cumpriu ? 'Semana cumprida: meta subiu um degrau' : 'Semana puxada: meta desceu um degrau');
   }
 
+  const config = ficha ? configGanho(ficha) : null;
+  const temBase = !!config && config.perguntas.length > 0;
+  const baseAtual = temBase && estado.ganhos.chave === config!.chave && estado.ganhos.respostas ? descreverBase(config!, estado.ganhos.respostas) : null;
+  const destino = estado.ganhos.destino;
+  const nomesDestino: Record<string, string> = { guardar: 'Guardar', conta: 'Quitar uma conta', presente: 'Um presente para alguém', viagem: 'Uma viagem' };
+  const respostasDia = Object.keys(estado.registroDiario).length;
+
   const guardado = [
     ficha && `Apelido: ${ficha.apelido} · idade ${ficha.faixaIdade}`,
     ficha && `Tema: ${temaDaFicha(ficha).nome}`,
@@ -105,6 +114,10 @@ export default function Perfil() {
     `${estado.diario.length} entradas no diário · ${estado.cartas.length} cartas`,
     `${estado.sessoes.length} agendamentos`,
     estado.consentimento && `Consentimento dado em ${new Date(estado.consentimento.em).toLocaleDateString('pt-BR')}`,
+    temBase && `Base dos ganhos: ${baseAtual ?? (estado.ganhos.recusou ? 'preferiu não informar' : 'ainda não informada')}`,
+    destino &&
+      `Destino do dinheiro: ${destino.tipo === 'outro' ? destino.texto : nomesDestino[destino.tipo]}${destino.alvo ? ` (alvo de ${formatarReais(destino.alvo, false)})` : ''}`,
+    respostasDia > 0 && `${respostasDia} ${respostasDia === 1 ? 'resposta' : 'respostas'} de como foi o dia`,
     estado.textosNaoReconhecidos.length > 0 &&
       `${estado.textosNaoReconhecidos.length} ${estado.textosNaoReconhecidos.length === 1 ? 'texto não reconhecido guardado' : 'textos não reconhecidos guardados'} para melhorar o app`,
   ].filter(Boolean) as string[];
@@ -180,6 +193,7 @@ export default function Perfil() {
         )}
         <Botao titulo="Baixar meus dados" variante="contorno" icone="baixar" onPress={baixar} />
         <Botao titulo="Corrigir minhas respostas" variante="contorno" icone="lapis" onPress={() => router.push('/ficha')} />
+        {temBase && <Botao titulo="Corrigir o valor dos ganhos" variante="contorno" icone="lapis" onPress={() => router.push('/ganhos')} />}
         <Linha
           icone="grupo"
           titulo="Ajudar a melhorar o app"

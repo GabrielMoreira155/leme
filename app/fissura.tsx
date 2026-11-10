@@ -111,6 +111,8 @@ export default function Fissura() {
 
   function terminarRespiracao() {
     pararOndas();
+    // Na respiração de emergência, chegar ao fim conta como onda atravessada (ganho do tipo ondas).
+    if (soRespiracao) atualizar((e) => ({ ...e, fissurasAtravessadas: e.fissurasAtravessadas + 1 }));
     setEtapa(soRespiracao ? 'fim' : 'porque');
   }
 

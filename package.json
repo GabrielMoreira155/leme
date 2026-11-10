@@ -35,7 +35,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
-    "publicar": "node scripts/publicar-web.js"
+    "publicar": "node scripts/publicar-web.js",
+    "test": "node --no-warnings --test tests/ganhos.test.ts"
   },
   "private": true
 }

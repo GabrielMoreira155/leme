@@ -2,9 +2,11 @@ import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { BarraProgresso, Botao, Cartao, Chip, Icone, Texto, Tuga } from '@/components';
+import { CartaoGanhos } from '@/components/CartaoGanhos';
 import { Energia } from '@/components/Energia';
 import { Foco } from '@/components/Foco';
 import { MapaRota } from '@/components/MapaRota';
+import { PerguntaDoDia } from '@/components/PerguntaDoDia';
 import { diasDaSemana, diasSemanaAnterior, hoje, Humor, nivelXP, temSemanaCompleta, TITULOS_NIVEL, useEstado, XP_POR_NIVEL } from '@/lib/estado';
 import { diasMeta, MISSAO_RECOMECO, missoesDoDia, textoMeta } from '@/lib/plano';
 import { focoDaFicha, temaDaFicha } from '@/lib/tema';
@@ -29,13 +31,6 @@ const HUMORES: { id: Humor; nome: string; icone: 'sol' | 'nuvem' | 'chuva' }[] =
   { id: 'dificil', nome: 'Difícil', icone: 'chuva' },
 ];
 
-function formatarGanho(valor: number, formato: 'reais' | 'horas' | 'numero') {
-  const v = Math.round(valor);
-  if (formato === 'reais') return `R$ ${v.toLocaleString('pt-BR')}`;
-  if (formato === 'horas') return `${v}h`;
-  return `${v}`;
-}
-
 export default function Hoje() {
   const { estado, atualizar, ganharXP, mostrarAviso } = useEstado();
   const [questAberta, setQuestAberta] = useState(false);
@@ -58,7 +53,6 @@ export default function Hoje() {
   const questFeitaHoje = estado.questFeita === hojeStr;
   const quest = QUESTS[Math.floor(Date.now() / 86400000) % QUESTS.length];
   const humorHoje = estado.humor.find((h) => h.data === hojeStr)?.valor;
-  const ganho = tema.ganho ? tema.ganho.base + tema.ganho.porDia * estado.diasCuidados.length : 0;
 
   function concluirMissao(id: string) {
     if (feitas.includes(id)) return;
@@ -184,6 +178,7 @@ export default function Hoje() {
             </View>
           </View>
         )}
+        <PerguntaDoDia />
       </Cartao>
 
       {/* Meta da semana (temas de cuidado, como a relação com a comida, não têm meta de dias livres) */}
@@ -283,19 +278,8 @@ export default function Hoje() {
         </Cartao>
       )}
 
-      {/* Ganhos reais */}
-      {tema.ganho && (
-      <Cartao style={{ gap: espaco.xs }}>
-        <Texto v="rotulo">SEUS GANHOS ATÉ AQUI</Texto>
-        <Texto style={estilos.ganho}>{formatarGanho(ganho, tema.ganho!.formato)}</Texto>
-        <Texto v="corpo" style={{ fontSize: 15 }}>
-          {tema.ganho!.rotulo}
-        </Texto>
-        <Texto v="apoio" style={{ fontSize: 12 }}>
-          Valor simulado no protótipo. Na versão real, você informa a sua média.
-        </Texto>
-      </Cartao>
-      )}
+      {/* Ganhos reais, personalizados pelo tema */}
+      <CartaoGanhos />
 
       <Botao titulo="Tive um tropeço" variante="contorno" icone="boia" onPress={() => router.push('/tropeco')} />
       <Texto v="apoio" style={{ textAlign: 'center' }}>
@@ -369,5 +353,4 @@ const estilos = StyleSheet.create({
   },
   quest: { flexDirection: 'row', alignItems: 'center', gap: espaco.md },
   cadeado: { width: 48, height: 48, borderRadius: 24, backgroundColor: cores.areia, alignItems: 'center', justifyContent: 'center' },
-  ganho: { fontFamily: fontes.titulo, fontSize: 34, lineHeight: 42, color: cores.mare },
 });

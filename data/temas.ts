@@ -43,8 +43,7 @@ export type Tema = {
   /** Complemento usado na meta da semana: "2 dias ___" */
   livre: string;
   missoes: Missao[];
-  /** Contador de ganhos reais (valores simulados no protótipo). */
-  ganho?: { rotulo: string; porDia: number; base: number; formato: 'reais' | 'horas' | 'numero'; unidade?: string };
+  // O tipo de ganho de cada tema fica em data/ganhos.ts.
 };
 
 export const TEMAS: Tema[] = [
@@ -61,7 +60,6 @@ export const TEMAS: Tema[] = [
       { id: 'cel3', texto: 'Primeira meia hora do dia sem rede social' },
       { id: 'cel4', texto: 'Colocar a tela em preto e branco à noite' },
     ],
-    ganho: { rotulo: 'de tela recuperadas', porDia: 1.5, base: 3, formato: 'horas' },
   },
   {
     id: 'sono',
@@ -76,7 +74,6 @@ export const TEMAS: Tema[] = [
       { id: 'son3', texto: 'Café só até as 15h hoje' },
       { id: 'son4', texto: 'Abrir a janela e pegar luz logo ao acordar' },
     ],
-    ganho: { rotulo: 'de sono a mais na semana', porDia: 0.8, base: 2, formato: 'horas' },
   },
   {
     id: 'procrastinacao',
@@ -91,7 +88,6 @@ export const TEMAS: Tema[] = [
       { id: 'pro3', texto: 'Dividir uma tarefa grande em passos pequenos' },
       { id: 'pro4', texto: 'Trabalhar 25 minutos com o celular longe' },
     ],
-    ganho: { rotulo: 'tarefas destravadas', porDia: 2, base: 4, formato: 'numero' },
   },
   {
     id: 'doce',
@@ -106,7 +102,6 @@ export const TEMAS: Tema[] = [
       { id: 'doc3', texto: 'Deixar uma fruta à vista para a hora da vontade' },
       { id: 'doc4', texto: 'Esperar 10 minutos quando a vontade bater' },
     ],
-    ganho: { rotulo: 'que ficaram com você', porDia: 9, base: 18, formato: 'reais' },
   },
   {
     id: 'apostas',
@@ -121,7 +116,6 @@ export const TEMAS: Tema[] = [
       { id: 'apo3', texto: 'Anotar quanto dinheiro ficou com você hoje' },
       { id: 'apo4', texto: 'Ver um jogo sem abrir nenhum app de aposta' },
     ],
-    ganho: { rotulo: 'que deixaram de ir para as apostas', porDia: 85, base: 170, formato: 'reais' },
   },
   {
     id: 'alcool',
@@ -136,7 +130,6 @@ export const TEMAS: Tema[] = [
       { id: 'alc3', texto: 'Trocar o drink do fim do dia por uma bebida sem álcool' },
       { id: 'alc4', texto: 'Anotar como você dormiu e acordou hoje' },
     ],
-    ganho: { rotulo: 'que ficaram com você', porDia: 30, base: 60, formato: 'reais' },
   },
   {
     id: 'cigarro',
@@ -151,7 +144,6 @@ export const TEMAS: Tema[] = [
       { id: 'cig3', texto: 'Na vontade, beber água gelada bem devagar' },
       { id: 'cig4', texto: 'Caminhar 5 minutos no lugar da pausa para fumar' },
     ],
-    ganho: { rotulo: 'que ficaram com você', porDia: 16, base: 32, formato: 'reais' },
   },
   {
     id: 'pornografia',
@@ -166,7 +158,6 @@ export const TEMAS: Tema[] = [
       { id: 'por3', texto: 'Na vontade, levantar e mudar de cômodo' },
       { id: 'por4', texto: 'Anotar a hora e o lugar em que a vontade apareceu' },
     ],
-    ganho: { rotulo: 'de volta para você', porDia: 1, base: 2, formato: 'horas' },
   },
   {
     id: 'ansiedade',
@@ -181,7 +172,6 @@ export const TEMAS: Tema[] = [
       { id: 'ans3', texto: 'Caminhar 10 minutos olhando ao redor' },
       { id: 'ans4', texto: 'Contar 5 coisas que você vê e 4 que você ouve' },
     ],
-    ganho: { rotulo: 'pausas de calma feitas', porDia: 2, base: 3, formato: 'numero' },
   },
   {
     id: 'outro',
@@ -196,7 +186,6 @@ export const TEMAS: Tema[] = [
       { id: 'out3', texto: 'Contar para alguém de confiança o que você está cuidando' },
       { id: 'out4', texto: 'Escrever o que você ganha cuidando disso' },
     ],
-    ganho: { rotulo: 'vitórias pequenas', porDia: 2, base: 2, formato: 'numero' },
   },
   // Temas que não aparecem na lista, mas o "Outro" reconhece pelo texto (data/sinonimos.ts).
   {
