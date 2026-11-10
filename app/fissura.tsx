@@ -7,7 +7,8 @@ import { DISTRACOES } from '@/data/atividades';
 import { cuidadoPorId } from '@/data/cuidados';
 import { useEstado } from '@/lib/estado';
 import { textoMeta } from '@/lib/plano';
-import { pararOndas, tocarOndas, vibrarLeve, vibrarSuave } from '@/lib/som';
+import { faseOndas, FaseRespiracao, iniciarOndas, pararOndas } from '@/lib/ondas';
+import { vibrarLeve, vibrarSuave } from '@/lib/som';
 import { cores, espaco, fontes } from '@/theme';
 
 // Sequência de fissura (3 a 5 minutos): respiração guiada, o porquê da pessoa e uma distração rápida.
@@ -15,7 +16,7 @@ import { cores, espaco, fontes } from '@/theme';
 
 type Etapa = 'intro' | 'respira' | 'porque' | 'distrair' | 'fim';
 
-const FASES = [
+const FASES: { nome: FaseRespiracao; segundos: number; escala: number }[] = [
   { nome: 'Inspira', segundos: 4, escala: 1 },
   { nome: 'Segura', segundos: 4, escala: 1 },
   { nome: 'Solta', segundos: 6, escala: 0.55 },
@@ -43,6 +44,7 @@ export default function Fissura() {
     const f = FASES[fase];
     setRestante(f.segundos);
     vibrarLeve();
+    if (somAtivo) faseOndas(f.nome, f.segundos);
     Animated.timing(escala, {
       toValue: f.escala,
       duration: f.segundos * 1000,
@@ -77,19 +79,32 @@ export default function Fissura() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [etapa, fase, ciclo]);
 
-  // Som de ondas acompanha só a etapa de respiração.
+  // Som de ondas só existe na etapa de respiração; sai com fade ao trocar de etapa ou de tela.
   useEffect(() => {
-    if (etapa === 'respira' && somAtivo) tocarOndas();
-    else pararOndas();
-  }, [etapa, somAtivo]);
+    if (etapa !== 'respira') pararOndas();
+  }, [etapa]);
 
   useEffect(() => () => pararOndas(), []);
+
+  // O navegador só libera áudio dentro de um toque: ligar o som sempre parte de um toque da pessoa.
+  function alternarSom() {
+    const ligar = !somAtivo;
+    setSomAtivo(ligar);
+    if (etapa !== 'respira') return;
+    if (ligar) {
+      iniciarOndas();
+      faseOndas(FASES[fase].nome, restante);
+    } else {
+      pararOndas();
+    }
+  }
 
   function comecar() {
     atualizar((e) => ({ ...e, jaRespirou: true }));
     setFase(0);
     setCiclo(1);
     escala.setValue(0.55);
+    if (somAtivo) iniciarOndas();
     setEtapa('respira');
   }
 
@@ -113,7 +128,7 @@ export default function Fissura() {
       icone={somAtivo ? 'somLigado' : 'somDesligado'}
       rotulo={somAtivo ? 'Silenciar som de ondas' : 'Ligar som de ondas'}
       cor={escuro ? cores.branco : cores.oceano}
-      onPress={() => setSomAtivo(!somAtivo)}
+      onPress={alternarSom}
     />
   );
 
@@ -157,7 +172,7 @@ export default function Fissura() {
             <View style={estilos.dica}>
               <Icone nome="fone" size={20} cor={cores.turquesa} />
               <Texto v="apoio" style={{ color: '#D7E2EC', flex: 1 }}>
-                Primeira vez? Com fone de ouvido fica melhor. Tem som de ondas no ritmo da respiração.
+                Coloque o fone, se puder.
               </Texto>
             </View>
           )}
@@ -180,12 +195,13 @@ export default function Fissura() {
           <Texto v="apoio" style={{ color: '#9FB3C6' }}>
             Ciclo {ciclo} de {CICLOS}
           </Texto>
-          {somAtivo && (
-            // Legenda do áudio
+          {/* Legenda do áudio, para acessibilidade */}
+          <View style={estilos.legenda} accessibilityLiveRegion="polite">
+            <Icone nome={somAtivo ? 'somLigado' : 'somDesligado'} size={14} cor="#9FB3C6" />
             <Texto v="apoio" style={{ color: '#9FB3C6', fontSize: 12 }}>
-              [som de ondas no ritmo da respiração]
+              {somAtivo ? 'Som de ondas ligado' : 'Som desligado'}
             </Texto>
-          )}
+          </View>
         </View>
       )}
 
@@ -248,6 +264,7 @@ const estilos = StyleSheet.create({
   palco: { width: 300, height: 300, alignItems: 'center', justifyContent: 'center' },
   circulo: { position: 'absolute', width: 300, height: 300, borderRadius: 150, backgroundColor: 'rgba(63,184,175,0.22)' },
   circuloInterno: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(63,184,175,0.35)' },
+  legenda: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   fase: { fontFamily: fontes.titulo, fontSize: 30, color: cores.branco },
   contagem: { fontFamily: fontes.tituloMedio, fontSize: 22, color: cores.turquesa },
 });

@@ -3,8 +3,8 @@ import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 
 // Sons e vibração. Telas de crise nunca chamam nada daqui.
+// O som de ondas da respiração fica em lib/ondas.ts (celular) e lib/ondas.web.ts (navegador).
 
-let ondas: AudioPlayer | null = null;
 let sininho: AudioPlayer | null = null;
 let modoConfigurado = false;
 
@@ -13,26 +13,6 @@ async function prepararModo() {
   modoConfigurado = true;
   try {
     await setAudioModeAsync({ playsInSilentMode: true, interruptionMode: 'mixWithOthers' });
-  } catch {}
-}
-
-// Som de ondas em loop, no ritmo da respiração (ciclo de 14s gerado em scripts/gerar-sons.js).
-export function tocarOndas() {
-  prepararModo();
-  try {
-    if (!ondas) {
-      ondas = createAudioPlayer(require('../assets/sounds/ondas.wav'));
-      ondas.loop = true;
-      ondas.volume = 0.7;
-    }
-    ondas.seekTo(0);
-    ondas.play();
-  } catch {}
-}
-
-export function pararOndas() {
-  try {
-    ondas?.pause();
   } catch {}
 }
 
