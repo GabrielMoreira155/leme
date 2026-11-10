@@ -22,6 +22,8 @@ export const cores = {
   tugaPele: '#5CC2B0',
   tugaCasco: '#2E8C7E',
   tugaLinha: '#226D62',
+  fundoWeb: '#081A29', // fora da moldura de celular no navegador
+
 } as const;
 
 export const fontes = {

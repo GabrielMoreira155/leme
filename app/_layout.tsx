@@ -54,7 +54,8 @@ export default function RootLayout() {
 }
 
 const estilos = StyleSheet.create({
-  fora: { flex: 1, backgroundColor: Platform.OS === 'web' ? cores.oceano : cores.areia },
+  // Fundo de fora mais escuro que o oceano, para telas de fundo oceano (fissura) não se fundirem com ele.
+  fora: { flex: 1, backgroundColor: Platform.OS === 'web' ? cores.fundoWeb : cores.areia },
   app: {
     flex: 1,
     width: '100%',
@@ -62,5 +63,8 @@ const estilos = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: cores.areia,
     overflow: 'hidden',
+    ...(Platform.OS === 'web'
+      ? { borderLeftWidth: 1, borderRightWidth: 1, borderColor: 'rgba(255,255,255,0.12)', boxShadow: '0 0 48px rgba(0,0,0,0.45)' }
+      : {}),
   },
 });
