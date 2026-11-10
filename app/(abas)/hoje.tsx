@@ -9,7 +9,7 @@ import { MapaRota } from '@/components/MapaRota';
 import { PerguntaDoDia } from '@/components/PerguntaDoDia';
 import { diasDaSemana, diasSemanaAnterior, hoje, Humor, nivelXP, temSemanaCompleta, TITULOS_NIVEL, useEstado, XP_POR_NIVEL } from '@/lib/estado';
 import { diasMeta, MISSAO_RECOMECO, missoesDoDia, textoMeta } from '@/lib/plano';
-import { focoDaFicha, temaDaFicha } from '@/lib/tema';
+import { focoDaFicha, momentoDoTema, temaDaFicha } from '@/lib/tema';
 import { tocarSininho, vibrarSucesso } from '@/lib/som';
 import { cores, espaco, fontes, raio } from '@/theme';
 
@@ -39,6 +39,7 @@ export default function Hoje() {
 
   const tema = temaDaFicha(ficha);
   const foco = focoDaFicha(ficha);
+  const momento = momentoDoTema(tema, estado.modoDiscreto);
   const { nivel, noNivel } = nivelXP(estado.xp);
   const titulo = TITULOS_NIVEL[Math.min(nivel - 1, TITULOS_NIVEL.length - 1)];
   const semana = diasDaSemana();
@@ -148,7 +149,7 @@ export default function Hoje() {
       <Pressable
         onPress={() => router.push('/fissura')}
         accessibilityRole="button"
-        accessibilityLabel="Estou com vontade agora"
+        accessibilityLabel={momento.botao}
         accessibilityHint="Abre uma respiração guiada de poucos minutos"
         style={({ pressed }) => [estilos.fissura, pressed && { transform: [{ scale: 0.985 }], opacity: 0.95 }]}
       >
@@ -156,8 +157,8 @@ export default function Hoje() {
           <Icone nome="onda" size={30} cor={cores.textoCoral} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
-          <Texto style={estilos.fissuraTitulo}>Estou com vontade agora</Texto>
-          <Texto style={estilos.fissuraSub}>Uns minutos para atravessar a onda. Não gasta energia.</Texto>
+          <Texto style={estilos.fissuraTitulo}>{momento.botao}</Texto>
+          <Texto style={estilos.fissuraSub}>{momento.sub}</Texto>
         </View>
       </Pressable>
 

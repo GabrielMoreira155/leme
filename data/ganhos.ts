@@ -115,6 +115,11 @@ const POR_TEMA: Partial<Record<IdTema, ConfigGanho>> = {
   unha: semPergunta('ondas', 'unha'),
   substancias: semPergunta('ondas', 'substancias'),
   outro: semPergunta('ondas', 'outro'),
+  // Questões emocionais: contam os momentos difíceis atravessados.
+  autoestima: semPergunta('ondas', 'autoestima'),
+  tristeza: semPergunta('ondas', 'tristeza'),
+  raiva: semPergunta('ondas', 'raiva'),
+  solidao: semPergunta('ondas', 'solidao'),
   // Relação com a comida: sem cartão de ganhos.
   alimentacao: semPergunta('nenhum', 'alimentacao'),
 };

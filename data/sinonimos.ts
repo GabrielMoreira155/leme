@@ -14,7 +14,7 @@ export const SINONIMOS: Partial<Record<IdTema, string[]>> = {
     'mega sena', 'bet365', 'betano', 'esporte da sorte', 'bingo', 'caca niquel', 'poker', 'truco valendo',
   ],
   alcool: [
-    '~beber', '~bebo', '~bebendo', '~bebida*', 'cerveja*', 'breja', 'cachaca', 'pinga', 'vinho*', 'porre*',
+    'beber', 'bebo', 'bebendo', '~bebida*', 'cerveja*', 'breja', 'cachaca', 'pinga', 'vinho*', 'porre*',
     'alcool', 'alcoolica', 'drink*', 'vodka', 'whisky', 'uisque', 'gin', 'chopp', 'chope', 'ressaca*',
     'encher a cara', 'beber demais', 'birita',
   ],
@@ -37,7 +37,10 @@ export const SINONIMOS: Partial<Record<IdTema, string[]>> = {
     'empurrar com a barriga', 'nao fazer as coisas', 'nao consigo comecar', '~preguica',
   ],
   sono: ['dormir tarde', 'insonia', 'acordar tarde', '~sono', 'nao durmo', 'dormir mal', 'virar a noite', 'madrugada acordado'],
-  ansiedade: ['ansiedade', 'ansioso', 'ansiosa', 'crise de ansiedade', '~nervoso', '~nervosa', 'preocupacao demais', 'panico'],
+  ansiedade: [
+    'ansiedade', 'ansioso', 'ansiosa', 'crise de ansiedade', '~nervoso', '~nervosa', 'preocupacao demais', 'panico',
+    '~estresse', '~estressado', '~estressada', 'pensar demais', 'overthinking', 'aperto no peito',
+  ],
 
   // Temas novos, fora da lista principal
   jogos: [
@@ -55,6 +58,26 @@ export const SINONIMOS: Partial<Record<IdTema, string[]>> = {
     'maconha', 'baseado', 'beck', 'cocaina', 'cheirar', 'crack', 'droga', 'drogas', 'lsd',
     'ecstasy', 'mdma', 'lanca perfume', 'lolo', 'ketamina', 'metanfetamina', 'haxixe', 'skunk',
     'heroina', 'remedio controlado', 'rivotril',
+  ],
+  // Questões emocionais
+  autoestima: [
+    'autoestima', 'auto estima', 'baixa autoestima', 'amor proprio', 'inseguranca', 'inseguro', 'insegura',
+    'me comparar', 'me comparo', 'comparacao', 'nao gosto de mim', 'me acho feio', 'me acho feia', 'me sinto feio',
+    'me sinto feia', 'me sinto inferior', 'me sinto inutil', 'autocritica', 'autoimagem', 'me cobrar demais',
+    'me cobro demais', 'perfeccionismo', 'sindrome do impostor', 'nao sou suficiente', 'vergonha de mim',
+  ],
+  tristeza: [
+    'tristeza', 'triste', 'desanimo', 'desanimado', 'desanimada', 'sem vontade de nada', 'sem vontade',
+    'ficar na cama', 'na cama o dia todo', 'vazio', 'vazia', 'depressao', 'deprimido', 'deprimida', 'sem energia',
+    'choro', 'chorar', 'chorando', 'apatia', 'melancolia', 'pra baixo', 'para baixo', 'luto', 'desmotivado', 'desmotivada',
+  ],
+  raiva: [
+    'raiva', 'irritacao', 'irritado', 'irritada', 'irritabilidade', 'explodir', 'explodo', 'estourar', 'estouro',
+    'pavio curto', 'gritar', 'grito', 'brigar', 'brigas', 'briga', 'descontrole', 'odio', 'impaciencia', 'impaciente',
+  ],
+  solidao: [
+    'solidao', '~sozinho', '~sozinha', 'me sinto so', 'isolado', 'isolada', 'isolamento', 'sem amigos', 'carencia',
+    'carente', 'ninguem liga', 'sem ninguem', 'abandonado', 'abandonada', 'falta de amigos',
   ],
   alimentacao: [
     'vomitar', 'vomito', 'provocar vomito', 'ficar sem comer', 'nao comer', 'parar de comer', 'jejum demais',

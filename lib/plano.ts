@@ -18,11 +18,10 @@
  */
 
 import type { IdCuidado } from '@/data/cuidados';
-import { cuidadoPorId } from '@/data/cuidados';
 import type { Personalizado } from '@/data/personalizado';
 import type { IdTema, Missao } from '@/data/temas';
 import { classificarNivel, Frequencia, Impacto, Nivel } from './nivel';
-import { temaDaFicha } from './tema';
+import { cuidadoDaFicha, temaDaFicha } from './tema';
 
 export type FaixaIdade = '13-17' | '18-24' | '25-39' | '40+';
 export type Seguranca = 'nao' | 'as-vezes' | 'sim-agora' | 'prefiro-nao';
@@ -38,6 +37,8 @@ export type Ficha = {
   frequencia: Frequencia;
   impacto: Impacto;
   cuidar: IdCuidado[];
+  /** O que quer cuidar, com as palavras da pessoa (quando marca "Escrever com minhas palavras"). */
+  cuidarTexto?: string;
   seguranca: Seguranca;
 };
 
@@ -65,7 +66,8 @@ export function textoMeta(degrau: number, ficha: FichaDoTema): string {
   const tema = temaDaFicha(ficha);
   if (tema.fazerMais) {
     const dias = DIAS_META_FAZER_MAIS[degrau];
-    return dias === 7 ? 'Fazer isso todos os dias da semana' : `Fazer isso em ${dias} dias da semana`;
+    const acao = tema.acao ?? 'Fazer isso';
+    return dias === 7 ? `${acao} todos os dias da semana` : `${acao} em ${dias} dias da semana`;
   }
   const livre = tema.livre;
   switch (degrau) {
@@ -94,7 +96,8 @@ function degrauInicial(f: Frequencia): number {
 }
 
 export function gerarPlano(ficha: Ficha): Plano {
-  const nivel = classificarNivel(temaDaFicha(ficha), ficha.frequencia, ficha.impacto);
+  const tema = temaDaFicha(ficha);
+  const nivel = classificarNivel(tema, ficha.frequencia, ficha.impacto);
   const risco = ficha.seguranca === 'as-vezes' || ficha.seguranca === 'sim-agora';
   return {
     nivel,
@@ -102,10 +105,10 @@ export function gerarPlano(ficha: Ficha): Plano {
     // para quem bebe muito, então a redução é gradual e com acompanhamento.
     degrau: ficha.tema === 'alcool' ? 0 : degrauInicial(ficha.frequencia),
     semana: 0,
-    convitePsicologo: nivel === 'pesado' || risco,
+    convitePsicologo: nivel === 'pesado' || risco || !!tema.conviteSempre,
     avisoAlcool: ficha.tema === 'alcool',
     menorDeIdade: ficha.faixaIdade === '13-17',
-    sessoesEmDestaque: nivel !== 'leve' || risco,
+    sessoesEmDestaque: nivel !== 'leve' || risco || !!tema.conviteSempre,
     criadoEm: new Date().toISOString(),
   };
 }
@@ -123,7 +126,7 @@ export function missoesDoDia(ficha: Ficha, data = new Date()): Missao[] {
   const i = dia % tema.missoes.length;
   const a = tema.missoes[i];
   const b = tema.missoes[(i + 1) % tema.missoes.length];
-  const cuidado = cuidadoPorId(ficha.cuidar[dia % Math.max(1, ficha.cuidar.length)]);
+  const cuidado = cuidadoDaFicha(ficha, ficha.cuidar[dia % Math.max(1, ficha.cuidar.length)]);
   return [a, b, cuidado.missao];
 }
 

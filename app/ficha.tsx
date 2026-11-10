@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { BarraProgresso, Botao, Cabecalho, Cartao, Chip, Icone, Tela, Texto } from '@/components';
 import { CampoOutro, DecisaoOutro, MINIMO_OUTRO } from '@/components/CampoOutro';
-import { CUIDADOS, IdCuidado } from '@/data/cuidados';
+import { CUIDADOS, IdCuidado, LIMITE_CUIDADO_LIVRE } from '@/data/cuidados';
 import { Direcao, DIRECOES, Momento, MOMENTOS, Pesa, PESOS } from '@/data/personalizado';
 import { IdTema, TEMAS_PRINCIPAIS } from '@/data/temas';
 import { useEstado } from '@/lib/estado';
-import { Interpretacao, interpretarOutro } from '@/lib/interpretarOutro';
+import { Interpretacao, interpretarOutro, temRisco } from '@/lib/interpretarOutro';
 import type { Frequencia, Impacto } from '@/lib/nivel';
 import type { FaixaIdade, Seguranca } from '@/lib/plano';
 import { cores, espaco, fontes, raio } from '@/theme';
@@ -51,6 +51,7 @@ export default function FichaTela() {
   const [frequencia, setFrequencia] = useState<Frequencia | null>(null);
   const [impacto, setImpacto] = useState<Impacto | null>(null);
   const [cuidar, setCuidar] = useState<IdCuidado[]>([]);
+  const [cuidarTexto, setCuidarTexto] = useState('');
   const [seguranca, setSeguranca] = useState<Seguranca | null>(null);
 
   // "Outro" com texto livre
@@ -107,7 +108,7 @@ export default function FichaTela() {
     personalizado: !!direcao && momentos.length > 0 && !!pesa,
     frequencia: !!frequencia,
     impacto: !!impacto,
-    cuidar: cuidar.length > 0,
+    cuidar: cuidar.length > 0 && (!cuidar.includes('livre') || cuidarTexto.trim().length >= MINIMO_OUTRO),
     seguranca: !!seguranca,
   };
 
@@ -123,6 +124,13 @@ export default function FichaTela() {
       setTema(null);
       setTextoOutro('');
       setInterpretacao(null);
+      router.push({ pathname: '/apoio', params: { origem: 'outro' } });
+      return;
+    }
+    // O texto livre do "o que quer cuidar" também passa pela checagem de risco.
+    if (atual === 'cuidar' && cuidar.includes('livre') && temRisco(cuidarTexto)) {
+      setCuidar(cuidar.filter((c) => c !== 'livre'));
+      setCuidarTexto('');
       router.push({ pathname: '/apoio', params: { origem: 'outro' } });
       return;
     }
@@ -142,6 +150,7 @@ export default function FichaTela() {
       frequencia: frequencia!,
       impacto: impacto!,
       cuidar,
+      cuidarTexto: cuidar.includes('livre') ? cuidarTexto.trim() : undefined,
       seguranca: seguranca!,
     };
     // Textos não reconhecidos ajudam a equipe a ver temas novos. Só no aparelho e só com o aceite opcional.
@@ -282,14 +291,13 @@ export default function FichaTela() {
       {atual === 'cuidar' && (
         <>
           <Texto v="h1">O que você quer cuidar?</Texto>
-          <Texto v="apoio">Pode marcar mais de um. Isso vira missão de hábito bom no seu plano.</Texto>
-          <View style={{ gap: espaco.sm }}>
+          <Texto v="apoio">Pode marcar mais de um. Isso vira missão de hábito bom no seu plano e aparece como o seu porquê nas horas difíceis.</Texto>
+          <View style={estilos.chips}>
             {CUIDADOS.map((c) => {
               const sel = cuidar.includes(c.id);
               return (
                 <Chip
                   key={c.id}
-                  largo
                   multiplo
                   rotulo={c.nome}
                   selecionado={sel}
@@ -298,6 +306,37 @@ export default function FichaTela() {
               );
             })}
           </View>
+          <Chip
+            largo
+            multiplo
+            icone="lapis"
+            rotulo="Escrever com minhas palavras"
+            selecionado={cuidar.includes('livre')}
+            onPress={() => setCuidar(cuidar.includes('livre') ? cuidar.filter((x) => x !== 'livre') : [...cuidar, 'livre'])}
+          />
+          {cuidar.includes('livre') && (
+            <View style={estilos.livre}>
+              <Texto v="h3">O que você quer melhorar?</Texto>
+              <TextInput
+                value={cuidarTexto}
+                onChangeText={setCuidarTexto}
+                placeholder="Ex.: voltar a tocar violão"
+                placeholderTextColor={cores.neblina}
+                maxLength={LIMITE_CUIDADO_LIVRE}
+                accessibilityLabel="O que você quer melhorar, com suas palavras"
+                style={estilos.campo}
+                autoFocus
+              />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: espaco.sm }}>
+                <Texto v="apoio" style={{ flex: 1, fontSize: 13 }}>
+                  Fica só no seu aparelho. Vira uma missão de passo pequeno no seu plano.
+                </Texto>
+                <Texto v="rotulo">
+                  {cuidarTexto.length}/{LIMITE_CUIDADO_LIVRE}
+                </Texto>
+              </View>
+            </View>
+          )}
         </>
       )}
 
@@ -335,4 +374,5 @@ const estilos = StyleSheet.create({
     color: cores.oceano,
   },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm },
+  livre: { gap: espaco.sm, padding: espaco.lg, borderRadius: raio.md, backgroundColor: cores.turquesaSuave },
 });

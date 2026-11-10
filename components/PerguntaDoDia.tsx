@@ -20,7 +20,14 @@ export function PerguntaDoDia() {
   const tema = temaDaFicha(estado.ficha);
   if (tema.semMetas) return null;
 
-  const rotulos = tema.fazerMais ? OPCOES_FAZER_MAIS : tema.id === 'sono' ? OPCOES_SONO : OPCOES_PADRAO;
+  const rotulos: Record<RespostaDia, string> = tema.respostasDia
+    ? { livre: tema.respostasDia[0], menos: tema.respostasDia[1], sempre: tema.respostasDia[2] }
+    : tema.fazerMais
+      ? OPCOES_FAZER_MAIS
+      : tema.id === 'sono'
+        ? OPCOES_SONO
+        : OPCOES_PADRAO;
+  const pergunta = tema.perguntaDia ?? `Como foi hoje com ${tema.nomeCurto}?`;
   const dia = hoje();
   const resposta = estado.registroDiario[dia];
 
@@ -32,7 +39,7 @@ export function PerguntaDoDia() {
 
   return (
     <View style={estilos.bloco}>
-      <Texto v="h3">Como foi hoje com {tema.nomeCurto}?</Texto>
+      <Texto v="h3">{pergunta}</Texto>
       {resposta ? (
         <View style={estilos.feito}>
           <Icone nome="check" size={18} cor={cores.mare} />

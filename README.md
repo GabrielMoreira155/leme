@@ -125,11 +125,20 @@ Ao tocar em "Outro", aparece um campo ("Conta pra gente, com suas palavras", at�
 2. **Reconhecimento** com o dicionário `data/sinonimos.ts`. O texto é normalizado (minúsculas, sem acento, sem pontuação) e comparado com sinônimos e gírias. Termos específicos pesam mais que genéricos: "beber energético" vira café ou energético, não álcool.
 3. **Confirmação:** "Parece que você quer cuidar de Apostas. É isso?". "Isso mesmo" usa o tema e guarda o texto para mostrar como "Foco: ...". "Não exatamente" vai para o tema personalizado.
 4. **Temas novos** fora da lista: jogos e videogame, compras por impulso, roer unha ou mexer na pele, café ou energético, séries e maratonas. Substâncias ilícitas viram nível pesado com missões genéricas de cuidado e convite ao psicólogo. Relação com a comida (vomitar, ficar sem comer, compulsão) não tem metas de dias livres nem cartão de ganhos: só cuidado, artigos e psicólogo.
+4b. **Questões emocionais** fora da lista: autoestima, desânimo e tristeza, raiva e irritação, solidão. Têm missões próprias, metas positivas ("Ter um gesto de cuidado consigo em 3 dias da semana"), pergunta do dia própria e contam os momentos difíceis atravessados. Desânimo e tristeza sempre trazem o convite ao psicólogo.
 5. **Tema personalizado** (texto não reconhecido): 3 perguntas de um toque. Diminuir ou fazer mais; quando acontece (até 2 momentos, que escolhem as missões em `data/personalizado.ts`); e no que pesa (define o tipo de ganho). "Fazer mais" troca as metas de dias livres por metas positivas ("Fazer isso em 3 dias da semana"). A pessoa continua sem criar metas.
 
 Textos não reconhecidos ficam guardados no aparelho, só se a pessoa marcou o aceite opcional, para a equipe ver que temas novos aparecem.
 
 **Preparado para IA:** o app só conhece `interpretarOutro()` e o tipo `Interpretacao`. Para trocar o dicionário por uma classificação com IA, basta criar outro objeto com a interface `Interpretador` e apontar `interpretadorAtivo` para ele. A função já é assíncrona por isso. A checagem de risco continua no aparelho, antes de tudo.
+
+## Botão do momento difícil
+
+O botão grande da tela Hoje fala a língua de cada questão (`momento` em `data/temas.ts`, `momentoDoTema` em `lib/tema.ts`): "Bateu vontade de apostar agora", "Não consigo dormir agora", "Travei agora", "A ansiedade apertou agora", "Estou me sentindo pra baixo agora", e assim por diante. A sequência que ele abre (título, explicação e tela final) muda junto. No modo discreto o botão volta a um texto neutro ("Preciso de uma pausa agora") para não expor o tema.
+
+## "O que você quer cuidar"
+
+13 opções (dormir melhor, foco, relações, autoestima, dinheiro, corpo e energia, mais calma, trabalho e estudos, família, amizades, lazer, casa e organização, sentido e propósito) e "Escrever com minhas palavras". O texto livre passa pela checagem de risco, vira o porquê da pessoa nas horas difíceis e uma missão ("Dar um passo pequeno hoje por: ...").
 
 ## Cartão de ganhos (`data/ganhos.ts` e `lib/ganhos.ts`)
 

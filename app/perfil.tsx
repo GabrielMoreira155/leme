@@ -5,7 +5,7 @@ import { Botao, Cabecalho, Cartao, Chip, Confirmacao, Icone, NomeIcone, Simbolo,
 import { ENERGIA_MAX, nivelXP, useEstado } from '@/lib/estado';
 import { NOME_ROTA } from '@/lib/nivel';
 import { ajustarMeta } from '@/lib/plano';
-import { temaDaFicha } from '@/lib/tema';
+import { cuidadoDaFicha, temaDaFicha } from '@/lib/tema';
 import { configGanho, descreverBase } from '@/data/ganhos';
 import { formatarReais } from '@/lib/ganhos';
 import { cores, espaco, fontes, raio } from '@/theme';
@@ -109,6 +109,7 @@ export default function Perfil() {
   const guardado = [
     ficha && `Apelido: ${ficha.apelido} · idade ${ficha.faixaIdade}`,
     ficha && `Tema: ${temaDaFicha(ficha).nome}`,
+    ficha && ficha.cuidar.length > 0 && `Quer cuidar de: ${ficha.cuidar.map((c) => cuidadoDaFicha(ficha, c).nome).join(', ')}`,
     `${estado.diasCuidados.length} ${estado.diasCuidados.length === 1 ? 'dia cuidado' : 'dias cuidados'} · ${estado.xp} XP`,
     `${estado.humor.length} check-ins de humor · ${estado.tropecos.length} tropeços anotados`,
     `${estado.diario.length} entradas no diário · ${estado.cartas.length} cartas`,

@@ -5,11 +5,13 @@ import { Botao, Cartao, Icone, Texto } from '@/components';
 import { Energia } from '@/components/Energia';
 import { Atividade, ATIVIDADES, XP_ATIVIDADE } from '@/data/atividades';
 import { formatarRecarga, RECARGA_MS, useEstado } from '@/lib/estado';
+import { momentoDoTema, temaDaFicha } from '@/lib/tema';
 import { cores, espaco, raio } from '@/theme';
 
 export default function Atividades() {
   const { estado, gastarEnergia } = useEstado();
   const [semEnergia, setSemEnergia] = useState(false);
+  const momento = estado.ficha ? momentoDoTema(temaDaFicha(estado.ficha), estado.modoDiscreto) : null;
 
   function abrir(a: Atividade) {
     if (a.id === 'respiracao') {
@@ -64,9 +66,9 @@ export default function Atividades() {
         );
       })}
 
-      <Botao titulo="Estou com vontade agora" icone="onda" onPress={() => router.push('/fissura')} />
+      <Botao titulo={momento?.botao ?? 'Estou com vontade agora'} icone="onda" onPress={() => router.push('/fissura')} />
       <Texto v="apoio" style={{ textAlign: 'center' }}>
-        O botão de vontade nunca gasta energia. Recarga completa a cada {RECARGA_MS / 3600000}h.
+        Esse botão nunca gasta energia. Recarga completa a cada {RECARGA_MS / 3600000}h.
       </Texto>
     </ScrollView>
   );

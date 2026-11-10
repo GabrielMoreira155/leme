@@ -4,7 +4,7 @@ import { Modal, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { configGanho } from '@/data/ganhos';
 import { Destino, Estado, TipoDestino, useEstado } from '@/lib/estado';
 import { calcularGanho, equivalenciaTempo, formatarHoras, formatarReais, ResultadoGanho } from '@/lib/ganhos';
-import { temaDaFicha } from '@/lib/tema';
+import { momentoDoTema, temaDaFicha } from '@/lib/tema';
 import { cores, espaco, fontes, raio } from '@/theme';
 import { BarraProgresso } from './BarraProgresso';
 import { Botao } from './Botao';
@@ -85,7 +85,7 @@ export function CartaoGanhos() {
     );
   }
 
-  const { numero, legenda } = textoPrincipal(resultado);
+  const { numero, legenda } = textoPrincipal(resultado, tema.legendaOndas);
   const equivalencia = resultado.tipo === 'tempo' ? equivalenciaTempo(resultado.total, sorteio) : null;
 
   return (
@@ -103,7 +103,10 @@ export function CartaoGanhos() {
         </Texto>
       )}
       {resultado.diasContados === 0 && (resultado.tipo === 'dinheiro' || resultado.tipo === 'tempo' || resultado.tipo === 'noites') && (
-        <Texto v="apoio">Responda "Como foi hoje com {tema.nomeCurto}?" para começar a somar.</Texto>
+        <Texto v="apoio">Responda "{tema.perguntaDia ?? `Como foi hoje com ${tema.nomeCurto}?`}" para começar a somar.</Texto>
+      )}
+      {resultado.total === 0 && resultado.tipo === 'ondas' && (
+        <Texto v="apoio">Quando precisar, use "{momentoDoTema(tema, estado.modoDiscreto).botao}". Cada vez que você for até o fim, conta aqui.</Texto>
       )}
       {tema.id === 'apostas' && resultado.tipo === 'dinheiro' && (
         <Texto v="apoio" style={{ fontSize: 13 }}>
@@ -126,7 +129,7 @@ export function CartaoGanhos() {
   );
 }
 
-function textoPrincipal(r: ResultadoGanho): { numero: string; legenda: string } {
+function textoPrincipal(r: ResultadoGanho, legendaOndas?: string): { numero: string; legenda: string } {
   const dias = plural(r.diasContados, 'dia cuidado', 'dias cuidados');
   switch (r.tipo) {
     case 'dinheiro':
@@ -136,6 +139,8 @@ function textoPrincipal(r: ResultadoGanho): { numero: string; legenda: string } 
     case 'noites':
       return { numero: plural(r.total, 'noite', 'noites'), legenda: 'dormidas no seu horário' };
     default:
+      // Questões emocionais contam "momentos"; hábitos e vontades contam "ondas".
+      if (legendaOndas) return { numero: plural(r.total, 'momento', 'momentos'), legenda: legendaOndas };
       return { numero: plural(r.total, 'onda', 'ondas'), legenda: 'atravessadas sem precisar obedecer' };
   }
 }
@@ -176,8 +181,10 @@ function FolhaCalculo({ visivel, aoFechar }: { visivel: boolean; aoFechar: () =>
     ];
   } else {
     paragrafos = [
-      'A gente conta as vezes em que você usou o botão "Estou com vontade agora" ou a respiração e foi até o fim. Cada uma é uma onda atravessada sem precisar obedecer.',
-      `Até agora foram ${plural(resultado.total, 'onda', 'ondas')}.`,
+      `A gente conta as vezes em que você usou o botão "${momentoDoTema(tema, estado.modoDiscreto).botao}" ou a respiração e foi até o fim. Cada uma é uma onda atravessada.`,
+      tema.legendaOndas
+        ? `Até agora foram ${plural(resultado.total, 'momento', 'momentos')} ${tema.legendaOndas}.`
+        : `Até agora foram ${plural(resultado.total, 'onda', 'ondas')}.`,
     ];
   }
 

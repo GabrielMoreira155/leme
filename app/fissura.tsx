@@ -4,10 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Platform, StyleSheet, View } from 'react-native';
 import { Botao, BotaoIcone, Cabecalho, Cartao, Icone, Tela, Texto, Tuga } from '@/components';
 import { DISTRACOES } from '@/data/atividades';
-import { cuidadoPorId } from '@/data/cuidados';
 import { useEstado } from '@/lib/estado';
 import { textoMeta } from '@/lib/plano';
-import { temaDaFicha } from '@/lib/tema';
+import { cuidadoDaFicha, momentoDoTema, temaDaFicha } from '@/lib/tema';
 import { faseOndas, FaseRespiracao, iniciarOndas, pararOndas } from '@/lib/ondas';
 import { vibrarLeve, vibrarSuave } from '@/lib/som';
 import { cores, espaco, fontes } from '@/theme';
@@ -38,6 +37,7 @@ export default function Fissura() {
   const [distracao, setDistracao] = useState(() => Math.floor(Math.random() * DISTRACOES.length));
   const escala = useRef(new Animated.Value(0.55)).current;
   const primeiraVez = !estado.jaRespirou;
+  const momento = momentoDoTema(estado.ficha ? temaDaFicha(estado.ficha) : null);
 
   // Motor da respiração: troca de fase, contagem e animação do círculo.
   useEffect(() => {
@@ -164,12 +164,12 @@ export default function Fissura() {
         <View style={estilos.centro}>
           <Tuga pose="respira" size={200} />
           <Texto v="h1" style={{ color: cores.branco, textAlign: 'center' }}>
-            Vamos atravessar essa onda juntos
+            {momento.titulo}
           </Texto>
           <Texto v="corpo" style={{ color: '#D7E2EC', textAlign: 'center' }}>
             {soRespiracao
               ? 'Inspira 4, segura 4, solta 6. Siga o círculo.'
-              : 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.'}
+              : momento.texto}
           </Texto>
           {primeiraVez && (
             <View style={estilos.dica}>
@@ -220,7 +220,7 @@ export default function Fissura() {
               <View key={c} style={{ flexDirection: 'row', gap: espaco.sm, alignItems: 'center' }}>
                 <Icone nome="coracao" size={20} cor={cores.mare} />
                 <Texto v="h3" style={{ flex: 1 }}>
-                  {cuidadoPorId(c).porque}
+                  {cuidadoDaFicha(estado.ficha!, c).porque}
                 </Texto>
               </View>
             ))}
@@ -250,7 +250,7 @@ export default function Fissura() {
         <View style={[estilos.centro, { marginTop: espaco.xl }]}>
           <Tuga pose="comemora" size={200} />
           <Texto v="h1" style={{ textAlign: 'center' }}>
-            Você atravessou essa onda
+            {momento.fim}
           </Texto>
           <Texto v="corpo" style={{ textAlign: 'center' }}>
             Cada vez que isso acontece, o caminho fica um pouco mais fácil. Se a vontade voltar, é só abrir de novo.

@@ -48,7 +48,7 @@ export function CampoOutro({ texto, aoMudarTexto, interpretacao, decisao, aoDeci
 
       {reconhecido && decisao === null && (
         <View style={estilos.confirmar} accessibilityLiveRegion="polite">
-          <Texto v="corpo" style={{ fontSize: 15 }}>
+          <Texto v="corpo" style={{ fontSize: 15 }} accessibilityLabel={`Parece que você quer cuidar de ${reconhecido.nome}. É isso?`}>
             Parece que você quer cuidar de <Texto style={{ fontFamily: fontes.textoNegrito }}>{reconhecido.nome}</Texto>. É isso?
           </Texto>
           <View style={estilos.botoes}>

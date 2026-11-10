@@ -21,10 +21,30 @@ export type IdTema =
   | 'series'
   | 'substancias'
   | 'alimentacao'
+  // Questões emocionais (cuidado, metas positivas)
+  | 'autoestima'
+  | 'tristeza'
+  | 'raiva'
+  | 'solidao'
   // Montado na hora a partir das 3 perguntas do tema personalizado (ver lib/tema.ts)
   | 'personalizado';
 
 export type Missao = { id: string; texto: string };
+
+// Textos do momento difícil: o botão da tela Hoje ("Estou com vontade agora") e a sequência que ele abre.
+// Cada tema fala a língua da sua questão. Sem `momento`, vale o texto padrão de vontade (lib/tema.ts).
+export type MomentoDificil = {
+  /** Texto do botão grande da tela Hoje. */
+  botao: string;
+  /** Linha de apoio do botão. */
+  sub: string;
+  /** Título da primeira tela da sequência. */
+  titulo: string;
+  /** Explicação da primeira tela. */
+  texto: string;
+  /** Título da tela final. */
+  fim: string;
+};
 
 export type Tema = {
   id: IdTema;
@@ -38,8 +58,19 @@ export type Tema = {
   nivelFixo?: 'leve' | 'moderado' | 'pesado';
   /** Sem metas de dias livres e sem cartão de ganhos: só cuidado, artigos e psicólogo. */
   semMetas?: boolean;
-  /** Personalizado de "fazer mais": metas positivas em vez de dias livres. */
+  /** Metas positivas em vez de dias livres (personalizado de "fazer mais" e questões emocionais). */
   fazerMais?: boolean;
+  /** Ação das metas positivas: "{acao} em 3 dias da semana". Padrão: "Fazer isso". */
+  acao?: string;
+  /** Pergunta do dia própria. Padrão: "Como foi hoje com {nomeCurto}?" */
+  perguntaDia?: string;
+  /** Rótulos próprios para a resposta do dia: [100%, 50%, 0]. */
+  respostasDia?: [string, string, string];
+  /** Convite para o psicólogo sempre no plano, qualquer que seja o nível. */
+  conviteSempre?: boolean;
+  /** Com legenda própria, o ganho do tipo ondas conta "momentos": "3 momentos {legendaOndas}". */
+  legendaOndas?: string;
+  momento?: MomentoDificil;
   /** Complemento usado na meta da semana: "2 dias ___" */
   livre: string;
   missoes: Missao[];
@@ -49,6 +80,13 @@ export type Tema = {
 export const TEMAS: Tema[] = [
   {
     id: 'celular',
+    momento: {
+      botao: 'Não consigo largar o celular agora',
+      sub: 'Uns minutos para respirar e soltar a tela. Não gasta energia.',
+      titulo: 'Vamos atravessar essa onda juntos',
+      texto: 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.',
+      fim: 'Você atravessou essa onda',
+    },
     nomeCurto: 'o celular',
     principal: true,
     nome: 'Celular e redes sociais',
@@ -63,6 +101,13 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'sono',
+    momento: {
+      botao: 'Não consigo dormir agora',
+      sub: 'Uns minutos de respiração lenta para o corpo desacelerar. Não gasta energia.',
+      titulo: 'Vamos desacelerar juntos',
+      texto: 'Deite ou sente de um jeito confortável. A respiração lenta avisa o corpo que dá para descansar.',
+      fim: 'Corpo mais calmo agora',
+    },
     nomeCurto: 'o sono',
     principal: true,
     nome: 'Sono bagunçado',
@@ -77,6 +122,13 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'procrastinacao',
+    momento: {
+      botao: 'Travei agora',
+      sub: 'Uns minutos para respirar e dar o primeiro passo pequeno. Não gasta energia.',
+      titulo: 'Vamos destravar juntos',
+      texto: 'Primeiro respirar, depois lembrar por que isso importa e escolher um passo de 2 minutos.',
+      fim: 'Você saiu do lugar',
+    },
     nomeCurto: 'a procrastinação',
     principal: true,
     nome: 'Procrastinação',
@@ -91,6 +143,13 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'doce',
+    momento: {
+      botao: 'Bateu vontade de beliscar agora',
+      sub: 'Uns minutos para ver se é fome ou impulso. Não gasta energia.',
+      titulo: 'Vamos atravessar essa onda juntos',
+      texto: 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.',
+      fim: 'Você atravessou essa onda',
+    },
     nomeCurto: 'o doce e a comida por impulso',
     principal: true,
     nome: 'Doce e comida por impulso',
@@ -105,6 +164,13 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'apostas',
+    momento: {
+      botao: 'Bateu vontade de apostar agora',
+      sub: 'Uns minutos para a onda passar antes de qualquer aposta. Não gasta energia.',
+      titulo: 'Vamos atravessar essa onda juntos',
+      texto: 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.',
+      fim: 'Você atravessou essa onda',
+    },
     nomeCurto: 'as apostas',
     principal: true,
     nome: 'Apostas',
@@ -119,6 +185,13 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'alcool',
+    momento: {
+      botao: 'Bateu vontade de beber agora',
+      sub: 'Uns minutos para atravessar a onda. Não gasta energia.',
+      titulo: 'Vamos atravessar essa onda juntos',
+      texto: 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.',
+      fim: 'Você atravessou essa onda',
+    },
     nomeCurto: 'o álcool',
     principal: true,
     nome: 'Álcool',
@@ -133,6 +206,13 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'cigarro',
+    momento: {
+      botao: 'Bateu vontade de fumar agora',
+      sub: 'Uns minutos para atravessar a onda. Não gasta energia.',
+      titulo: 'Vamos atravessar essa onda juntos',
+      texto: 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.',
+      fim: 'Você atravessou essa onda',
+    },
     nomeCurto: 'o cigarro ou vape',
     principal: true,
     nome: 'Cigarro ou vape',
@@ -161,6 +241,14 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'ansiedade',
+    momento: {
+      botao: 'A ansiedade apertou agora',
+      sub: 'Uns minutos de respiração para o corpo baixar o volume. Não gasta energia.',
+      titulo: 'Vamos baixar o volume juntos',
+      texto: 'A ansiedade sobe e desce como onda. Respirando devagar, o corpo entende que está seguro.',
+      fim: 'Você atravessou esse aperto',
+    },
+    legendaOndas: 'de ansiedade atravessados',
     nomeCurto: 'a ansiedade',
     principal: true,
     nome: 'Ansiedade',
@@ -190,6 +278,13 @@ export const TEMAS: Tema[] = [
   // Temas que não aparecem na lista, mas o "Outro" reconhece pelo texto (data/sinonimos.ts).
   {
     id: 'jogos',
+    momento: {
+      botao: 'Bateu vontade de jogar agora',
+      sub: 'Uns minutos antes de abrir o jogo. Não gasta energia.',
+      titulo: 'Vamos atravessar essa onda juntos',
+      texto: 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.',
+      fim: 'Você atravessou essa onda',
+    },
     nome: 'Jogos e videogame',
     nomeCurto: 'os jogos',
     pesado: false,
@@ -203,6 +298,13 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'compras',
+    momento: {
+      botao: 'Bateu vontade de comprar agora',
+      sub: 'Uns minutos antes de finalizar qualquer compra. Não gasta energia.',
+      titulo: 'Vamos atravessar essa onda juntos',
+      texto: 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.',
+      fim: 'Você atravessou essa onda',
+    },
     nome: 'Compras por impulso',
     nomeCurto: 'as compras por impulso',
     pesado: false,
@@ -216,6 +318,13 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'unha',
+    momento: {
+      botao: 'Bateu vontade de mexer nas unhas agora',
+      sub: 'Uns minutos para ocupar as mãos e respirar. Não gasta energia.',
+      titulo: 'Vamos atravessar essa onda juntos',
+      texto: 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.',
+      fim: 'Você atravessou essa onda',
+    },
     nome: 'Roer unha ou mexer na pele',
     nomeCurto: 'roer unha ou mexer na pele',
     pesado: false,
@@ -229,6 +338,13 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'cafe',
+    momento: {
+      botao: 'Bateu vontade de mais uma dose agora',
+      sub: 'Uns minutos para ver se é cansaço ou costume. Não gasta energia.',
+      titulo: 'Vamos atravessar essa onda juntos',
+      texto: 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.',
+      fim: 'Você atravessou essa onda',
+    },
     nome: 'Café ou energético em excesso',
     nomeCurto: 'o café ou energético',
     pesado: false,
@@ -242,6 +358,13 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'series',
+    momento: {
+      botao: 'Bateu vontade de maratonar agora',
+      sub: 'Uns minutos antes do próximo episódio. Não gasta energia.',
+      titulo: 'Vamos atravessar essa onda juntos',
+      texto: 'São poucos minutos: respirar, lembrar do seu porquê e fazer uma pausa rápida. A vontade sobe e desce como onda.',
+      fim: 'Você atravessou essa onda',
+    },
     nome: 'Séries e maratonas',
     nomeCurto: 'as séries',
     pesado: false,
@@ -284,6 +407,106 @@ export const TEMAS: Tema[] = [
       { id: 'ali2', texto: 'Anotar como você se sentiu antes de comer hoje' },
       { id: 'ali3', texto: 'Contar para alguém de confiança como está o seu dia' },
       { id: 'ali4', texto: 'Ler um artigo do Leme com calma' },
+    ],
+  },
+  // Questões emocionais: o plano é de cuidado, com metas positivas e convite ao psicólogo quando faz sentido.
+  {
+    id: 'autoestima',
+    nome: 'Autoestima',
+    nomeCurto: 'a autoestima',
+    pesado: false,
+    fazerMais: true,
+    acao: 'Ter um gesto de cuidado consigo',
+    perguntaDia: 'Hoje você conseguiu se tratar com gentileza?',
+    respostasDia: ['Consegui', 'Um pouco', 'Hoje não'],
+    legendaOndas: 'difíceis atravessados com gentileza',
+    livre: 'com um gesto de cuidado consigo',
+    momento: {
+      botao: 'Estou me sentindo pra baixo agora',
+      sub: 'Uns minutos para respirar e se tratar com gentileza. Não gasta energia.',
+      titulo: 'Vamos passar por esse momento juntos',
+      texto: 'Pensamentos duros sobre você sobem e descem como onda. Respire, lembre do que importa e fale consigo como falaria com alguém de quem gosta.',
+      fim: 'Você cuidou de você agora',
+    },
+    missoes: [
+      { id: 'aut1', texto: 'Escrever 3 coisas que você fez bem hoje, mesmo pequenas' },
+      { id: 'aut2', texto: 'Falar consigo como falaria com alguém de quem você gosta, uma vez hoje' },
+      { id: 'aut3', texto: 'Silenciar por um dia um perfil que faz você se comparar' },
+      { id: 'aut4', texto: 'Fazer uma coisa só porque você gosta' },
+    ],
+  },
+  {
+    id: 'tristeza',
+    nome: 'Desânimo e tristeza',
+    nomeCurto: 'o desânimo',
+    pesado: false,
+    fazerMais: true,
+    conviteSempre: true,
+    acao: 'Fazer uma coisa pequena que te faça bem',
+    perguntaDia: 'Hoje deu para fazer uma coisa pequena que te fez bem?',
+    respostasDia: ['Deu', 'Um pouco', 'Hoje não'],
+    legendaOndas: 'pesados atravessados',
+    livre: 'com uma coisa pequena que te faça bem',
+    momento: {
+      botao: 'Bateu um peso agora',
+      sub: 'Uns minutos para respirar e atravessar esse momento. Não gasta energia.',
+      titulo: 'Você não precisa atravessar isso só',
+      texto: 'Vamos com calma: respirar, lembrar do que importa e fazer uma coisa bem pequena. Se o peso estiver grande demais, o botão Ajuda agora está sempre no topo.',
+      fim: 'Você atravessou esse momento',
+    },
+    missoes: [
+      { id: 'tri1', texto: 'Abrir a janela e pegar um pouco de luz' },
+      { id: 'tri2', texto: 'Tomar um banho com calma' },
+      { id: 'tri3', texto: 'Mandar mensagem para alguém de confiança' },
+      { id: 'tri4', texto: 'Sair de casa por 10 minutos, nem que seja até a esquina' },
+    ],
+  },
+  {
+    id: 'raiva',
+    nome: 'Raiva e irritação',
+    nomeCurto: 'a raiva',
+    pesado: false,
+    perguntaDia: 'Como foi hoje com a raiva?',
+    respostasDia: ['Tranquilo', 'Explodi menos', 'Como sempre'],
+    legendaOndas: 'de raiva atravessados sem explodir',
+    livre: 'sem explodir',
+    momento: {
+      botao: 'Estou com raiva agora',
+      sub: 'Uns minutos para baixar a temperatura antes de agir. Não gasta energia.',
+      titulo: 'Vamos baixar a temperatura juntos',
+      texto: 'A raiva sobe rápido e desce se você der tempo. Antes de responder ou agir, respire com a gente.',
+      fim: 'Você não deixou a raiva decidir',
+    },
+    missoes: [
+      { id: 'rai1', texto: 'Na raiva, sair de perto por 5 minutos antes de responder' },
+      { id: 'rai2', texto: 'Anotar o que te irritou hoje e o que estava por trás' },
+      { id: 'rai3', texto: 'Fazer a Respiração de emergência quando sentir o corpo esquentar' },
+      { id: 'rai4', texto: 'Mexer o corpo por 10 minutos para descarregar a tensão' },
+    ],
+  },
+  {
+    id: 'solidao',
+    nome: 'Solidão',
+    nomeCurto: 'a solidão',
+    pesado: false,
+    fazerMais: true,
+    acao: 'Ter um momento de conexão com alguém',
+    perguntaDia: 'Hoje você teve um momento de conexão com alguém?',
+    respostasDia: ['Tive', 'Um pouco', 'Hoje não'],
+    legendaOndas: 'de solidão atravessados',
+    livre: 'com um momento de conexão',
+    momento: {
+      botao: 'Bateu a solidão agora',
+      sub: 'Uns minutos para respirar e procurar uma conexão. Não gasta energia.',
+      titulo: 'Vamos atravessar esse momento juntos',
+      texto: 'A solidão pesa mais em alguns horários. Respire, lembre de quem importa para você e escolha um pequeno contato.',
+      fim: 'Você atravessou esse momento',
+    },
+    missoes: [
+      { id: 'sol1', texto: 'Mandar mensagem para alguém com quem você não fala há um tempo' },
+      { id: 'sol2', texto: 'Ir a um lugar com gente por perto, como uma praça ou um café' },
+      { id: 'sol3', texto: 'Responder uma mensagem que estava parada' },
+      { id: 'sol4', texto: 'Procurar um grupo de algo que você gosta, ou uma roda anônima do Leme' },
     ],
   },
 ];
