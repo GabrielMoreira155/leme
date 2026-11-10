@@ -2,9 +2,10 @@ import { Redirect, router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { BarraProgresso, Botao, Cartao, Chip, Icone, Texto, Tuga } from '@/components';
+import { Energia } from '@/components/Energia';
 import { MapaRota } from '@/components/MapaRota';
 import { temaPorId } from '@/data/temas';
-import { diasDaSemana, diasSemanaAnterior, ENERGIA_MAX, hoje, Humor, nivelXP, temSemanaCompleta, TITULOS_NIVEL, useEstado, XP_POR_NIVEL } from '@/lib/estado';
+import { diasDaSemana, diasSemanaAnterior, hoje, Humor, nivelXP, temSemanaCompleta, TITULOS_NIVEL, useEstado, XP_POR_NIVEL } from '@/lib/estado';
 import { DIAS_META, MISSAO_RECOMECO, missoesDoDia, textoMeta } from '@/lib/plano';
 import { tocarSininho, vibrarSucesso } from '@/lib/som';
 import { cores, espaco, fontes, raio } from '@/theme';
@@ -138,11 +139,7 @@ export default function Hoje() {
           <Texto v="rotulo" style={{ color: '#D7E2EC' }}>
             ENERGIA
           </Texto>
-          <View style={{ flexDirection: 'row', gap: 4 }} accessible accessibilityLabel={`Energia: ${estado.energia} de ${ENERGIA_MAX}`}>
-            {Array.from({ length: ENERGIA_MAX }, (_, i) => (
-              <Icone key={i} nome="vela" size={22} cor={i < estado.energia ? cores.turquesa : cores.oceanoClaro} />
-            ))}
-          </View>
+          <Energia energia={estado.energia} recargaEm={estado.energiaRecargaEm} escuro />
         </View>
       </Cartao>
 

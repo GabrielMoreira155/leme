@@ -101,6 +101,16 @@ export function temSemanaCompleta(e: Estado): boolean {
   return !!inicio && Date.now() - new Date(inicio).getTime() >= 7 * 86400000;
 }
 
+// Tempo que falta para a energia encher, no formato "1h40", "2h" ou "25 min".
+export function formatarRecarga(recargaEm: number | null, agora = Date.now()): string {
+  const restante = Math.ceil(((recargaEm ?? agora + RECARGA_MS) - agora) / 60000);
+  const min = Math.min(RECARGA_MS / 60000, Math.max(1, restante));
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return m ? `${h}h${String(m).padStart(2, '0')}` : `${h}h`;
+}
+
 // Dias cuidados na semana anterior à atual.
 export function diasSemanaAnterior(e: Estado): number {
   if (e.semanaAnterior !== null) return e.semanaAnterior;
@@ -212,7 +222,8 @@ export function EstadoProvider({ children }: { children: ReactNode }) {
     if (atual.energia <= 0) return false;
     atualizar((e) => {
       const energia = Math.max(0, e.energia - 1);
-      return { ...e, energia, energiaRecargaEm: energia === 0 ? Date.now() + RECARGA_MS : e.energiaRecargaEm };
+      // A recarga completa conta a partir da primeira energia gasta.
+      return { ...e, energia, energiaRecargaEm: e.energiaRecargaEm ?? Date.now() + RECARGA_MS };
     });
     return true;
   }, [estado, atualizar]);
