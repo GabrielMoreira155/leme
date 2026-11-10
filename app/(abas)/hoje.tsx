@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { BarraProgresso, Botao, Cartao, Chip, Icone, Texto, Tuga } from '@/components';
 import { MapaRota } from '@/components/MapaRota';
 import { temaPorId } from '@/data/temas';
-import { diasDaSemana, ENERGIA_MAX, hoje, Humor, nivelXP, TITULOS_NIVEL, useEstado, XP_POR_NIVEL } from '@/lib/estado';
+import { diasDaSemana, diasSemanaAnterior, ENERGIA_MAX, hoje, Humor, nivelXP, temSemanaCompleta, TITULOS_NIVEL, useEstado, XP_POR_NIVEL } from '@/lib/estado';
 import { DIAS_META, MISSAO_RECOMECO, missoesDoDia, textoMeta } from '@/lib/plano';
 import { tocarSininho, vibrarSucesso } from '@/lib/som';
 import { cores, espaco, fontes, raio } from '@/theme';
@@ -129,7 +129,8 @@ export default function Hoje() {
             })}
           </View>
           <Texto v="apoio" style={{ color: '#D7E2EC' }}>
-            {cuidadosSemana} {cuidadosSemana === 1 ? 'dia' : 'dias'} até agora. Semana passada: {estado.semanaAnterior}.
+            {cuidadosSemana} {cuidadosSemana === 1 ? 'dia' : 'dias'} até agora.{' '}
+            {temSemanaCompleta(estado) ? `Semana passada: ${diasSemanaAnterior(estado)}.` : 'Sua primeira semana de viagem.'}
           </Texto>
         </View>
 

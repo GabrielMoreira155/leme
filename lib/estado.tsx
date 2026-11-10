@@ -36,8 +36,8 @@ export type Estado = {
   modoDiscreto: boolean;
   pin: string | null;
   pausaAte: number | null;
-  /** Dias cuidados na semana anterior (simulado para mostrar a comparação). */
-  semanaAnterior: number;
+  /** Força o número da semana anterior (só o painel de apresentação usa). Sem isso, conta os dias reais. */
+  semanaAnterior: number | null;
 };
 
 export const ESTADO_INICIAL: Estado = {
@@ -64,7 +64,7 @@ export const ESTADO_INICIAL: Estado = {
   modoDiscreto: false,
   pin: null,
   pausaAte: null,
-  semanaAnterior: 2,
+  semanaAnterior: null,
 };
 
 // Data local no formato AAAA-MM-DD.
@@ -91,6 +91,22 @@ export function nivelXP(xp: number) {
     nivel: Math.floor(xp / XP_POR_NIVEL) + 1,
     noNivel: xp % XP_POR_NIVEL,
   };
+}
+
+// Só compara com a semana anterior quando ela existe: 7 dias desde o primeiro uso (consentimento),
+// ou um porto já alcançado (inclusive pela simulação do painel de apresentação).
+export function temSemanaCompleta(e: Estado): boolean {
+  if ((e.plano?.semana ?? 0) > 0) return true;
+  const inicio = e.consentimento?.em ?? e.plano?.criadoEm;
+  return !!inicio && Date.now() - new Date(inicio).getTime() >= 7 * 86400000;
+}
+
+// Dias cuidados na semana anterior à atual.
+export function diasSemanaAnterior(e: Estado): number {
+  if (e.semanaAnterior !== null) return e.semanaAnterior;
+  const base = new Date();
+  base.setDate(base.getDate() - 7);
+  return diasDaSemana(base).filter((d) => e.diasCuidados.includes(d)).length;
 }
 
 export const TITULOS_NIVEL = ['Grumete', 'Marujo', 'Timoneiro', 'Navegador', 'Capitão'];
