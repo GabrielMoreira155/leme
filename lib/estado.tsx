@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { Linking, Platform } from 'react-native';
 import type { Ficha, Plano } from './plano';
 
 // Todo o estado do protótipo vive no aparelho (AsyncStorage). Não existe backend.
@@ -123,6 +124,21 @@ function normalizar(e: Estado): Estado {
   return r;
 }
 
+// Lê o ?reset=1 da URL de abertura. No navegador, também tira o parâmetro da barra
+// para um recarregar não apagar tudo de novo.
+async function pedidoDeReset(): Promise<boolean> {
+  if (Platform.OS === 'web') {
+    if (typeof window === 'undefined') return false;
+    const url = new URL(window.location.href);
+    if (url.searchParams.get('reset') !== '1') return false;
+    url.searchParams.delete('reset');
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+    return true;
+  }
+  const inicial = await Linking.getInitialURL();
+  return !!inicial && /[?&]reset=1(&|$)/.test(inicial);
+}
+
 export function EstadoProvider({ children }: { children: ReactNode }) {
   const [estado, setEstado] = useState<Estado>(ESTADO_INICIAL);
   const [carregado, setCarregado] = useState(false);
@@ -131,12 +147,20 @@ export function EstadoProvider({ children }: { children: ReactNode }) {
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    AsyncStorage.getItem(CHAVE)
-      .then((txt) => {
+    (async () => {
+      try {
+        // Atalho para apresentações: abrir o app com ?reset=1 começa do zero.
+        if (await pedidoDeReset()) {
+          await AsyncStorage.clear();
+          return;
+        }
+        const txt = await AsyncStorage.getItem(CHAVE);
         if (txt) setEstado(normalizar({ ...ESTADO_INICIAL, ...JSON.parse(txt) }));
-      })
-      .catch(() => {})
-      .finally(() => setCarregado(true));
+      } catch {
+      } finally {
+        setCarregado(true);
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -178,7 +202,7 @@ export function EstadoProvider({ children }: { children: ReactNode }) {
   }, [estado, atualizar]);
 
   const resetar = useCallback(async () => {
-    await AsyncStorage.removeItem(CHAVE);
+    await AsyncStorage.clear();
     setEstado({ ...ESTADO_INICIAL, missoes: { data: hoje(), feitas: [] } });
     setDesbloqueado(false);
   }, []);

@@ -49,6 +49,7 @@ function baixarJSON(dados: object) {
 export default function Perfil() {
   const { estado, atualizar, resetar, mostrarAviso } = useEstado();
   const [confirmarApagar, setConfirmarApagar] = useState(false);
+  const [confirmarReset, setConfirmarReset] = useState(false);
   const [verDados, setVerDados] = useState(false);
   const [novoPin, setNovoPin] = useState('');
   const [demo, setDemo] = useState(false);
@@ -58,6 +59,7 @@ export default function Perfil() {
 
   async function apagarTudo() {
     setConfirmarApagar(false);
+    setConfirmarReset(false);
     await resetar();
     router.replace('/boas-vindas');
   }
@@ -261,6 +263,13 @@ export default function Perfil() {
           Leme · protótipo v0.1
         </Texto>
       </Pressable>
+      <Botao
+        titulo="Resetar protótipo (para apresentações)"
+        variante="fantasma"
+        dica="Apaga tudo e volta para a tela de boas-vindas"
+        onPress={() => setConfirmarReset(true)}
+        style={{ marginTop: -espaco.md }}
+      />
 
       {demo && (
         <Cartao tom="areia" style={{ gap: espaco.sm }}>
@@ -275,7 +284,7 @@ export default function Perfil() {
               mostrarAviso('Energia cheia');
             }}
           />
-          <Botao titulo="Resetar protótipo" variante="oceano" onPress={apagarTudo} />
+          <Botao titulo="Resetar protótipo" variante="oceano" onPress={() => setConfirmarReset(true)} />
         </Cartao>
       )}
 
@@ -287,6 +296,15 @@ export default function Perfil() {
         cancelar="Manter meus dados"
         aoConfirmar={apagarTudo}
         aoCancelar={() => setConfirmarApagar(false)}
+      />
+      <Confirmacao
+        visivel={confirmarReset}
+        titulo="Resetar o protótipo?"
+        texto="Todo o estado salvo neste aparelho é apagado e o app volta para a tela de boas-vindas, como na primeira vez. Dica: abrir o link com ?reset=1 no final faz o mesmo."
+        confirmar="Sim, começar do zero"
+        cancelar="Cancelar"
+        aoConfirmar={apagarTudo}
+        aoCancelar={() => setConfirmarReset(false)}
       />
     </Tela>
   );

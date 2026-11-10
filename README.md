@@ -126,6 +126,8 @@ Missões do dia: 2 do tema (giram a cada dia) e 1 do "o que quer cuidar" (hábit
 
 ## Para apresentar
 
+Para começar do zero, use o botão **Resetar protótipo (para apresentações)** no fim do Perfil, ou abra o link com `?reset=1` no final (ex.: https://leme-mauve.vercel.app/?reset=1). Os dois apagam todo o estado salvo e voltam para a tela de boas-vindas.
+
 No **Perfil**, toque **5 vezes** (ou segure) em "Leme · protótipo v0.1" no fim da tela. Abre o painel escondido com:
 
 - **Simular semana cumprida / que não fechou:** mostra a meta subindo ou descendo e o mapa de portos andando.
