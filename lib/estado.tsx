@@ -192,6 +192,23 @@ async function parametroDeAbertura(nome: string): Promise<string | null> {
   return achado ? decodeURIComponent(achado[1]) : null;
 }
 
+// Protótipo publicado para apresentações: cada nova visita ao link (aba nova, janela nova, link
+// colado de novo) começa na tela de boas-vindas, do zero. Recarregar a página na mesma aba mantém
+// o progresso, porque a marca fica no sessionStorage, que dura enquanto a aba estiver aberta.
+// Só vale no navegador; no celular o app guarda tudo normalmente.
+const MARCA_VISITA = '@leme/visita-em-andamento';
+
+function novaVisitaNoNavegador(): boolean {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return false;
+  try {
+    if (window.sessionStorage.getItem(MARCA_VISITA)) return false;
+    window.sessionStorage.setItem(MARCA_VISITA, '1');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function EstadoProvider({ children }: { children: ReactNode }) {
   const [estado, setEstado] = useState<Estado>(ESTADO_INICIAL);
   const [carregado, setCarregado] = useState(false);
@@ -205,7 +222,8 @@ export function EstadoProvider({ children }: { children: ReactNode }) {
         // Atalhos para apresentações:
         //   ?reset=1        começa do zero
         //   ?demo=apostas   (ou celular, outro) começa com ficha, base e alguns dias de histórico
-        const reset = (await parametroDeAbertura('reset')) === '1';
+        //   nova visita     no navegador, abrir o link de novo também começa do zero
+        const reset = (await parametroDeAbertura('reset')) === '1' || novaVisitaNoNavegador();
         const demo = await parametroDeAbertura('demo');
         if (reset || demo) await AsyncStorage.clear();
         if (demo && (DEMOS as string[]).includes(demo)) {

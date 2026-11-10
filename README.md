@@ -163,7 +163,9 @@ Todo tema tem um tipo de ganho:
 
 ## Para apresentar
 
-Para começar do zero, use o botão **Resetar protótipo (para apresentações)** no fim do Perfil, ou abra o link com `?reset=1` no final (ex.: https://leme-mauve.vercel.app/?reset=1). Os dois apagam todo o estado salvo e voltam para a tela de boas-vindas.
+No navegador, **cada nova visita ao link começa do zero, na tela de boas-vindas** (aba nova, janela nova ou link aberto de novo). Recarregar a página na mesma aba mantém o progresso. No celular, o app guarda tudo normalmente.
+
+Para começar do zero sem abrir o link de novo, use o botão **Resetar protótipo (para apresentações)** no fim do Perfil, ou abra o link com `?reset=1` no final (ex.: https://leme-mauve.vercel.app/?reset=1). Os dois apagam todo o estado salvo e voltam para a tela de boas-vindas.
 
 Presets que já abrem na tela Hoje com ficha, base dos ganhos e alguns dias de histórico (apagam o estado atual):
 
