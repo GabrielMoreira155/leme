@@ -7,6 +7,7 @@ import { DISTRACOES } from '@/data/atividades';
 import { cuidadoPorId } from '@/data/cuidados';
 import { useEstado } from '@/lib/estado';
 import { textoMeta } from '@/lib/plano';
+import { temaDaFicha } from '@/lib/tema';
 import { faseOndas, FaseRespiracao, iniciarOndas, pararOndas } from '@/lib/ondas';
 import { vibrarLeve, vibrarSuave } from '@/lib/som';
 import { cores, espaco, fontes } from '@/theme';
@@ -222,9 +223,9 @@ export default function Fissura() {
               </View>
             ))}
           </Cartao>
-          {estado.plano && (
+          {estado.plano && !temaDaFicha(estado.ficha).semMetas && (
             <Texto v="apoio">
-              Sua meta da semana: {textoMeta(estado.plano.degrau, estado.ficha.tema).toLowerCase()}. Essa onda passando é um passo nessa direção.
+              Sua meta da semana: {textoMeta(estado.plano.degrau, estado.ficha).toLowerCase()}. Essa onda passando é um passo nessa direção.
             </Texto>
           )}
         </View>

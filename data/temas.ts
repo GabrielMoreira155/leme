@@ -12,24 +12,46 @@ export type IdTema =
   | 'cigarro'
   | 'pornografia'
   | 'ansiedade'
-  | 'outro';
+  | 'outro'
+  // Temas fora da lista principal, reconhecidos a partir do texto do "Outro"
+  | 'jogos'
+  | 'compras'
+  | 'unha'
+  | 'cafe'
+  | 'series'
+  | 'substancias'
+  | 'alimentacao'
+  // Montado na hora a partir das 3 perguntas do tema personalizado (ver lib/tema.ts)
+  | 'personalizado';
 
 export type Missao = { id: string; texto: string };
 
 export type Tema = {
   id: IdTema;
   nome: string;
+  /** Usado nos textos gerados: "Como foi hoje com {nomeCurto}?" */
+  nomeCurto: string;
   pesado: boolean;
+  /** Aparece na lista do passo "O que mais pesa hoje?" */
+  principal?: boolean;
+  /** Ignora a regra de frequência e impacto (ex.: substâncias, relação com a comida). */
+  nivelFixo?: 'leve' | 'moderado' | 'pesado';
+  /** Sem metas de dias livres e sem cartão de ganhos: só cuidado, artigos e psicólogo. */
+  semMetas?: boolean;
+  /** Personalizado de "fazer mais": metas positivas em vez de dias livres. */
+  fazerMais?: boolean;
   /** Complemento usado na meta da semana: "2 dias ___" */
   livre: string;
   missoes: Missao[];
   /** Contador de ganhos reais (valores simulados no protótipo). */
-  ganho: { rotulo: string; porDia: number; base: number; formato: 'reais' | 'horas' | 'numero'; unidade?: string };
+  ganho?: { rotulo: string; porDia: number; base: number; formato: 'reais' | 'horas' | 'numero'; unidade?: string };
 };
 
 export const TEMAS: Tema[] = [
   {
     id: 'celular',
+    nomeCurto: 'o celular',
+    principal: true,
     nome: 'Celular e redes sociais',
     pesado: false,
     livre: 'com o celular fora da cama',
@@ -43,6 +65,8 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'sono',
+    nomeCurto: 'o sono',
+    principal: true,
     nome: 'Sono bagunçado',
     pesado: false,
     livre: 'deitando no horário combinado',
@@ -56,6 +80,8 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'procrastinacao',
+    nomeCurto: 'a procrastinação',
+    principal: true,
     nome: 'Procrastinação',
     pesado: false,
     livre: 'começando a tarefa principal antes do almoço',
@@ -69,6 +95,8 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'doce',
+    nomeCurto: 'o doce e a comida por impulso',
+    principal: true,
     nome: 'Doce e comida por impulso',
     pesado: false,
     livre: 'sem comer por impulso',
@@ -82,6 +110,8 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'apostas',
+    nomeCurto: 'as apostas',
+    principal: true,
     nome: 'Apostas',
     pesado: true,
     livre: 'sem apostar',
@@ -95,6 +125,8 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'alcool',
+    nomeCurto: 'o álcool',
+    principal: true,
     nome: 'Álcool',
     pesado: true,
     livre: 'sem beber',
@@ -108,6 +140,8 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'cigarro',
+    nomeCurto: 'o cigarro ou vape',
+    principal: true,
     nome: 'Cigarro ou vape',
     pesado: true,
     livre: 'sem fumar ou vapear',
@@ -121,6 +155,8 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'pornografia',
+    nomeCurto: 'a pornografia',
+    principal: true,
     nome: 'Pornografia',
     pesado: true,
     livre: 'no rumo que você escolheu',
@@ -134,6 +170,8 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'ansiedade',
+    nomeCurto: 'a ansiedade',
+    principal: true,
     nome: 'Ansiedade',
     pesado: false,
     livre: 'com uma pausa de respiração',
@@ -147,6 +185,8 @@ export const TEMAS: Tema[] = [
   },
   {
     id: 'outro',
+    nomeCurto: 'esse hábito',
+    principal: true,
     nome: 'Outro',
     pesado: false,
     livre: 'no rumo que você escolheu',
@@ -158,8 +198,109 @@ export const TEMAS: Tema[] = [
     ],
     ganho: { rotulo: 'vitórias pequenas', porDia: 2, base: 2, formato: 'numero' },
   },
+  // Temas que não aparecem na lista, mas o "Outro" reconhece pelo texto (data/sinonimos.ts).
+  {
+    id: 'jogos',
+    nome: 'Jogos e videogame',
+    nomeCurto: 'os jogos',
+    pesado: false,
+    livre: 'sem passar do horário combinado no jogo',
+    missoes: [
+      { id: 'jog1', texto: 'Combinar um horário para desligar o jogo hoje' },
+      { id: 'jog2', texto: 'Jogar só depois de terminar uma tarefa do dia' },
+      { id: 'jog3', texto: 'Fazer uma pausa de 10 minutos a cada hora de jogo' },
+      { id: 'jog4', texto: 'Deixar o controle ou o celular fora do quarto na hora de dormir' },
+    ],
+  },
+  {
+    id: 'compras',
+    nome: 'Compras por impulso',
+    nomeCurto: 'as compras por impulso',
+    pesado: false,
+    livre: 'sem compras por impulso',
+    missoes: [
+      { id: 'com1', texto: 'Esperar 24 horas antes de finalizar uma compra' },
+      { id: 'com2', texto: 'Tirar o cartão salvo de um app de compras' },
+      { id: 'com3', texto: 'Desligar as notificações de promoção' },
+      { id: 'com4', texto: 'Anotar uma compra que você deixou de fazer hoje' },
+    ],
+  },
+  {
+    id: 'unha',
+    nome: 'Roer unha ou mexer na pele',
+    nomeCurto: 'roer unha ou mexer na pele',
+    pesado: false,
+    livre: 'sem roer unha ou mexer na pele',
+    missoes: [
+      { id: 'unh1', texto: 'Deixar algo para ocupar as mãos por perto' },
+      { id: 'unh2', texto: 'Anotar em que momento a vontade apareceu' },
+      { id: 'unh3', texto: 'Cuidar das mãos ou da pele com um creme hoje' },
+      { id: 'unh4', texto: 'Na vontade, fechar as mãos e respirar 3 vezes' },
+    ],
+  },
+  {
+    id: 'cafe',
+    nome: 'Café ou energético em excesso',
+    nomeCurto: 'o café ou energético',
+    pesado: false,
+    livre: 'só com a dose combinada',
+    missoes: [
+      { id: 'caf1', texto: 'Trocar uma dose por água ou chá' },
+      { id: 'caf2', texto: 'Nada de café ou energético depois das 15h' },
+      { id: 'caf3', texto: 'Anotar quantas doses você tomou hoje' },
+      { id: 'caf4', texto: 'Fazer uma pausa de 5 minutos no lugar de mais uma dose' },
+    ],
+  },
+  {
+    id: 'series',
+    nome: 'Séries e maratonas',
+    nomeCurto: 'as séries',
+    pesado: false,
+    livre: 'sem maratonar',
+    missoes: [
+      { id: 'ser1', texto: 'Desligar o próximo episódio automático do streaming' },
+      { id: 'ser2', texto: 'Combinar quantos episódios antes de começar' },
+      { id: 'ser3', texto: 'Parar no meio de um episódio, e não no final' },
+      { id: 'ser4', texto: 'Desligar a tela 30 minutos antes de dormir' },
+    ],
+  },
+  // Substâncias ilícitas: nível pesado, convite ao psicólogo e só missões genéricas de cuidado
+  // (gatilhos, rotina, rede de apoio). Nenhuma missão cita a substância.
+  {
+    id: 'substancias',
+    nome: 'Uso de substâncias',
+    nomeCurto: 'esse hábito',
+    pesado: true,
+    nivelFixo: 'pesado',
+    livre: 'no rumo que você escolheu',
+    missoes: [
+      { id: 'sub1', texto: 'Anotar o que veio antes da vontade hoje' },
+      { id: 'sub2', texto: 'Manter um horário parecido para dormir e acordar hoje' },
+      { id: 'sub3', texto: 'Mandar mensagem para alguém da sua rede de apoio' },
+      { id: 'sub4', texto: 'Planejar o que fazer na próxima hora difícil' },
+    ],
+  },
+  // Relação com a comida (vomitar, ficar sem comer, compulsão): sem metas de dias livres e sem
+  // cartão de ganhos. Encaminha para o psicólogo e oferece só missões de cuidado e artigos.
+  {
+    id: 'alimentacao',
+    nome: 'Relação com a comida',
+    nomeCurto: 'a relação com a comida',
+    pesado: true,
+    nivelFixo: 'pesado',
+    semMetas: true,
+    livre: 'com cuidado',
+    missoes: [
+      { id: 'ali1', texto: 'Fazer uma refeição com calma, sem tela' },
+      { id: 'ali2', texto: 'Anotar como você se sentiu antes de comer hoje' },
+      { id: 'ali3', texto: 'Contar para alguém de confiança como está o seu dia' },
+      { id: 'ali4', texto: 'Ler um artigo do Leme com calma' },
+    ],
+  },
 ];
 
+export const TEMAS_PRINCIPAIS = TEMAS.filter((t) => t.principal);
+
 export function temaPorId(id: IdTema | undefined): Tema {
-  return TEMAS.find((t) => t.id === id) ?? TEMAS[TEMAS.length - 1];
+  return TEMAS.find((t) => t.id === id) ?? TEMAS.find((t) => t.id === 'outro')!;
 }

@@ -2,10 +2,12 @@ import { Redirect, router } from 'expo-router';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Botao, Cartao, Icone, Tela, Texto, Tuga } from '@/components';
+import { Foco } from '@/components/Foco';
 import { MapaRota } from '@/components/MapaRota';
 import { useEstado } from '@/lib/estado';
 import { DESCRICAO_ROTA, NOME_ROTA } from '@/lib/nivel';
 import { gerarPlano, missoesDoDia, textoMeta } from '@/lib/plano';
+import { focoDaFicha, temaDaFicha } from '@/lib/tema';
 import { cores, espaco } from '@/theme';
 
 export default function PlanoTela() {
@@ -16,6 +18,8 @@ export default function PlanoTela() {
   if (!ficha || !plano) return <Redirect href="/" />;
 
   const missoes = missoesDoDia(ficha);
+  const tema = temaDaFicha(ficha);
+  const foco = focoDaFicha(ficha);
 
   function zarpar() {
     atualizar((e) => ({ ...e, plano }));
@@ -32,6 +36,7 @@ export default function PlanoTela() {
         <Texto v="apoio" style={{ textAlign: 'center', fontSize: 15 }}>
           {ficha.apelido}, montamos um plano a partir do que você contou. Você só precisa seguir. A gente ajusta junto pelo caminho.
         </Texto>
+        {foco && <Foco texto={foco} centro />}
       </View>
 
       <Cartao tom="oceano" style={{ gap: espaco.lg }}>
@@ -49,16 +54,29 @@ export default function PlanoTela() {
         </Texto>
       </Cartao>
 
-      <Cartao style={{ gap: espaco.sm }}>
-        <View style={estilos.titulo}>
-          <Icone nome="bussola" cor={cores.mare} />
-          <Texto v="h3">Meta desta semana</Texto>
-        </View>
-        <Texto v="h2">{textoMeta(plano.degrau, ficha.tema)}</Texto>
-        <Texto v="apoio">
-          Cumpriu a semana? A meta sobe um degrau. Não deu? Ela desce sozinha, sem castigo. A rota se ajusta ao mar.
-        </Texto>
-      </Cartao>
+      {tema.semMetas ? (
+        // Relação com a comida: sem contagem de dias livres, só cuidado.
+        <Cartao style={{ gap: espaco.sm }}>
+          <View style={estilos.titulo}>
+            <Icone nome="coracao" cor={cores.mare} />
+            <Texto v="h3">Uma rota de cuidado</Texto>
+          </View>
+          <Texto v="corpo" style={{ fontSize: 15 }}>
+            Aqui a gente não conta dias livres nem faz contas. O plano é de cuidado: missões leves, artigos e a companhia de um psicólogo.
+          </Texto>
+        </Cartao>
+      ) : (
+        <Cartao style={{ gap: espaco.sm }}>
+          <View style={estilos.titulo}>
+            <Icone nome="bussola" cor={cores.mare} />
+            <Texto v="h3">Meta desta semana</Texto>
+          </View>
+          <Texto v="h2">{textoMeta(plano.degrau, ficha)}</Texto>
+          <Texto v="apoio">
+            Cumpriu a semana? A meta sobe um degrau. Não deu? Ela desce sozinha, sem castigo. A rota se ajusta ao mar.
+          </Texto>
+        </Cartao>
+      )}
 
       <Cartao style={{ gap: espaco.md }}>
         <View style={estilos.titulo}>

@@ -1,11 +1,14 @@
 import { voltar as voltarTela } from '@/lib/navegar';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { BarraProgresso, Botao, Cabecalho, Cartao, Chip, Icone, Tela, Texto } from '@/components';
+import { CampoOutro, DecisaoOutro, MINIMO_OUTRO } from '@/components/CampoOutro';
 import { CUIDADOS, IdCuidado } from '@/data/cuidados';
-import { IdTema, TEMAS } from '@/data/temas';
+import { Direcao, DIRECOES, Momento, MOMENTOS, Pesa, PESOS } from '@/data/personalizado';
+import { IdTema, TEMAS_PRINCIPAIS } from '@/data/temas';
 import { useEstado } from '@/lib/estado';
+import { Interpretacao, interpretarOutro } from '@/lib/interpretarOutro';
 import type { Frequencia, Impacto } from '@/lib/nivel';
 import type { FaixaIdade, Seguranca } from '@/lib/plano';
 import { cores, espaco, fontes, raio } from '@/theme';
@@ -37,10 +40,10 @@ const SEGURANCA: { id: Seguranca; nome: string }[] = [
   { id: 'prefiro-nao', nome: 'Prefiro não responder' },
 ];
 
-const TOTAL = 6;
+type PassoId = 'apelido' | 'tema' | 'personalizado' | 'frequencia' | 'impacto' | 'cuidar' | 'seguranca';
 
 export default function FichaTela() {
-  const { atualizar } = useEstado();
+  const { estado, atualizar } = useEstado();
   const [passo, setPasso] = useState(0);
   const [apelido, setApelido] = useState('');
   const [faixa, setFaixa] = useState<FaixaIdade | null>(null);
@@ -50,27 +53,107 @@ export default function FichaTela() {
   const [cuidar, setCuidar] = useState<IdCuidado[]>([]);
   const [seguranca, setSeguranca] = useState<Seguranca | null>(null);
 
-  const pode = [
-    apelido.trim().length > 0 && !!faixa,
-    !!tema,
-    !!frequencia,
-    !!impacto,
-    cuidar.length > 0,
-    !!seguranca,
-  ][passo];
+  // "Outro" com texto livre
+  const [textoOutro, setTextoOutro] = useState('');
+  const [interpretacao, setInterpretacao] = useState<Interpretacao | null>(null);
+  const [decisao, setDecisao] = useState<DecisaoOutro>(null);
+  // Tema personalizado (3 perguntas)
+  const [direcao, setDirecao] = useState<Direcao | null>(null);
+  const [momentos, setMomentos] = useState<Momento[]>([]);
+  const [pesa, setPesa] = useState<Pesa | null>(null);
+
+  const ehOutro = tema === 'outro';
+  const textoValido = textoOutro.trim().length >= MINIMO_OUTRO;
+
+  // Reconhece o texto enquanto a pessoa escreve (com uma pequena espera entre as teclas).
+  useEffect(() => {
+    setDecisao(null);
+    if (!ehOutro || !textoValido) {
+      setInterpretacao(null);
+      return;
+    }
+    let ativo = true;
+    const t = setTimeout(() => {
+      interpretarOutro(textoOutro).then((r) => ativo && setInterpretacao(r));
+    }, 350);
+    return () => {
+      ativo = false;
+      clearTimeout(t);
+    };
+  }, [textoOutro, ehOutro, textoValido]);
+
+  const vaiPersonalizar =
+    ehOutro && !!interpretacao && interpretacao.tipo !== 'risco' && (!interpretacao.temaId || decisao === 'personalizado');
+
+  const passos: PassoId[] = [
+    'apelido',
+    'tema',
+    ...(vaiPersonalizar ? (['personalizado'] as PassoId[]) : []),
+    'frequencia',
+    'impacto',
+    'cuidar',
+    'seguranca',
+  ];
+  const total = passos.length;
+  const atual = passos[passo];
+
+  const temaPronto = ehOutro
+    ? textoValido && !!interpretacao && (interpretacao.tipo === 'risco' || !interpretacao.temaId || decisao !== null)
+    : !!tema;
+
+  const pode: Record<PassoId, boolean> = {
+    apelido: apelido.trim().length > 0 && !!faixa,
+    tema: temaPronto,
+    personalizado: !!direcao && momentos.length > 0 && !!pesa,
+    frequencia: !!frequencia,
+    impacto: !!impacto,
+    cuidar: cuidar.length > 0,
+    seguranca: !!seguranca,
+  };
+
+  function alternarMomento(m: Momento) {
+    if (momentos.includes(m)) return setMomentos(momentos.filter((x) => x !== m));
+    // até 2: o mais antigo sai quando entra um terceiro
+    setMomentos([...momentos, m].slice(-2));
+  }
 
   function avancar() {
-    if (passo < TOTAL - 1) return setPasso(passo + 1);
+    // Segurança antes de tudo: texto de risco não vira hábito, vai para o Apoio.
+    if (atual === 'tema' && ehOutro && interpretacao?.tipo === 'risco') {
+      setTema(null);
+      setTextoOutro('');
+      setInterpretacao(null);
+      router.push({ pathname: '/apoio', params: { origem: 'outro' } });
+      return;
+    }
+    if (passo < total - 1) return setPasso(passo + 1);
+
+    const temaFinal: IdTema = !ehOutro
+      ? tema!
+      : decisao === 'confirmado' && interpretacao?.temaId
+        ? interpretacao.temaId
+        : 'personalizado';
     const ficha = {
       apelido: apelido.trim(),
       faixaIdade: faixa!,
-      tema: tema!,
+      tema: temaFinal,
+      textoOutro: ehOutro ? textoOutro.trim() : undefined,
+      personalizado: temaFinal === 'personalizado' ? { direcao: direcao!, momentos, pesa: pesa! } : undefined,
       frequencia: frequencia!,
       impacto: impacto!,
       cuidar,
       seguranca: seguranca!,
     };
-    atualizar((e) => ({ ...e, ficha, plano: null }));
+    // Textos não reconhecidos ajudam a equipe a ver temas novos. Só no aparelho e só com o aceite opcional.
+    const guardarTexto = temaFinal === 'personalizado' && !!estado.consentimento?.melhorias;
+    atualizar((e) => ({
+      ...e,
+      ficha,
+      plano: null,
+      textosNaoReconhecidos: guardarTexto
+        ? [...e.textosNaoReconhecidos, { texto: textoOutro.trim(), em: new Date().toISOString() }]
+        : e.textosNaoReconhecidos,
+    }));
     if (seguranca === 'as-vezes' || seguranca === 'sim-agora') {
       router.replace({ pathname: '/apoio', params: { origem: 'ficha' } });
     } else {
@@ -87,15 +170,15 @@ export default function FichaTela() {
     <Tela
       topo={
         <View>
-          <Cabecalho titulo={`Passo ${passo + 1} de ${TOTAL}`} aoVoltar={voltar} />
+          <Cabecalho titulo={`Passo ${passo + 1} de ${total}`} aoVoltar={voltar} />
           <View style={{ paddingHorizontal: espaco.xl, paddingBottom: espaco.sm }}>
-            <BarraProgresso valor={(passo + 1) / TOTAL} rotulo={`Ficha, passo ${passo + 1} de ${TOTAL}`} />
+            <BarraProgresso valor={(passo + 1) / total} rotulo={`Ficha, passo ${passo + 1} de ${total}`} />
           </View>
         </View>
       }
-      rodape={<Botao titulo={passo === TOTAL - 1 ? 'Ver meu plano' : 'Continuar'} desabilitado={!pode} onPress={avancar} />}
+      rodape={<Botao titulo={passo === total - 1 ? 'Ver meu plano' : 'Continuar'} desabilitado={!pode[atual]} onPress={avancar} />}
     >
-      {passo === 0 && (
+      {atual === 'apelido' && (
         <>
           <Texto v="h1">Como a gente te chama?</Texto>
           <Texto v="apoio">Pode ser um apelido. Não precisa ser seu nome.</Texto>
@@ -120,19 +203,60 @@ export default function FichaTela() {
         </>
       )}
 
-      {passo === 1 && (
+      {atual === 'tema' && (
         <>
           <Texto v="h1">O que mais pesa hoje?</Texto>
           <Texto v="apoio">Escolha um. Dá para ajustar depois.</Texto>
           <View style={{ gap: espaco.sm }} accessibilityRole="radiogroup">
-            {TEMAS.map((t) => (
-              <Chip key={t.id} largo rotulo={t.nome} selecionado={tema === t.id} onPress={() => setTema(t.id)} />
+            {TEMAS_PRINCIPAIS.map((t) => (
+              <View key={t.id} style={{ gap: espaco.sm }}>
+                <Chip largo rotulo={t.nome} selecionado={tema === t.id} onPress={() => setTema(t.id)} />
+                {t.id === 'outro' && ehOutro && (
+                  <CampoOutro
+                    texto={textoOutro}
+                    aoMudarTexto={setTextoOutro}
+                    interpretacao={interpretacao}
+                    decisao={decisao}
+                    aoDecidir={setDecisao}
+                  />
+                )}
+              </View>
             ))}
           </View>
         </>
       )}
 
-      {passo === 2 && (
+      {atual === 'personalizado' && (
+        <>
+          <Texto v="h1">Sobre esse hábito</Texto>
+          <Texto v="apoio">3 perguntas rápidas, de um toque. Com elas a gente monta o seu plano.</Texto>
+          <Texto v="h3">Você quer diminuir isso ou fazer mais disso?</Texto>
+          <View style={{ gap: espaco.sm }} accessibilityRole="radiogroup">
+            {DIRECOES.map((d) => (
+              <Chip key={d.id} largo rotulo={d.nome} selecionado={direcao === d.id} onPress={() => setDirecao(d.id)} />
+            ))}
+          </View>
+          <Texto v="h3" style={{ marginTop: espaco.sm }}>
+            Quando isso costuma acontecer?
+          </Texto>
+          <Texto v="apoio">Até 2.</Texto>
+          <View style={estilos.chips}>
+            {MOMENTOS.map((m) => (
+              <Chip key={m.id} multiplo rotulo={m.nome} selecionado={momentos.includes(m.id)} onPress={() => alternarMomento(m.id)} />
+            ))}
+          </View>
+          <Texto v="h3" style={{ marginTop: espaco.sm }}>
+            Isso pesa mais no quê?
+          </Texto>
+          <View style={estilos.chips} accessibilityRole="radiogroup">
+            {PESOS.map((p) => (
+              <Chip key={p.id} rotulo={p.nome} selecionado={pesa === p.id} onPress={() => setPesa(p.id)} />
+            ))}
+          </View>
+        </>
+      )}
+
+      {atual === 'frequencia' && (
         <>
           <Texto v="h1">Com que frequência isso aparece?</Texto>
           <View style={{ gap: espaco.sm }} accessibilityRole="radiogroup">
@@ -143,7 +267,7 @@ export default function FichaTela() {
         </>
       )}
 
-      {passo === 3 && (
+      {atual === 'impacto' && (
         <>
           <Texto v="h1">Isso já atrapalhou seu trabalho, estudo, dinheiro ou relações?</Texto>
           <Texto v="apoio">Sem certo ou errado. É só para a rota ficar do seu tamanho.</Texto>
@@ -155,7 +279,7 @@ export default function FichaTela() {
         </>
       )}
 
-      {passo === 4 && (
+      {atual === 'cuidar' && (
         <>
           <Texto v="h1">O que você quer cuidar?</Texto>
           <Texto v="apoio">Pode marcar mais de um. Isso vira missão de hábito bom no seu plano.</Texto>
@@ -177,7 +301,7 @@ export default function FichaTela() {
         </>
       )}
 
-      {passo === 5 && (
+      {atual === 'seguranca' && (
         <>
           <Texto v="h1">Uma pergunta de cuidado</Texto>
           <Cartao tom="areia" style={{ flexDirection: 'row', gap: espaco.md }}>

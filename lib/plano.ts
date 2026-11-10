@@ -7,6 +7,9 @@
  *   1: 2 dias livres
  *   2: 4 dias livres
  *   3: 7 dias livres seguidos
+ * No tema personalizado de "fazer mais", as metas viram positivas:
+ *   0: 2 dias  1: 3 dias  2: 5 dias  3: todos os dias, sempre "fazer isso".
+ * Temas com semMetas (relação com a comida) não têm meta de dias livres.
  *
  * Degrau inicial pela frequência: quanto mais frequente o hábito,
  * mais leve o começo (várias vezes ao dia: 0, quase todo dia: 1,
@@ -14,11 +17,12 @@
  * desce um sozinha se a semana não fechar, sem castigo nenhum.
  */
 
-import type { IdTema, Missao } from '@/data/temas';
-import { temaPorId } from '@/data/temas';
 import type { IdCuidado } from '@/data/cuidados';
 import { cuidadoPorId } from '@/data/cuidados';
+import type { Personalizado } from '@/data/personalizado';
+import type { IdTema, Missao } from '@/data/temas';
 import { classificarNivel, Frequencia, Impacto, Nivel } from './nivel';
+import { temaDaFicha } from './tema';
 
 export type FaixaIdade = '13-17' | '18-24' | '25-39' | '40+';
 export type Seguranca = 'nao' | 'as-vezes' | 'sim-agora' | 'prefiro-nao';
@@ -27,6 +31,10 @@ export type Ficha = {
   apelido: string;
   faixaIdade: FaixaIdade;
   tema: IdTema;
+  /** Texto livre do "Outro", mostrado como "Foco: ...". Fica só no aparelho. */
+  textoOutro?: string;
+  /** Respostas das 3 perguntas quando tema === 'personalizado'. */
+  personalizado?: Personalizado;
   frequencia: Frequencia;
   impacto: Impacto;
   cuidar: IdCuidado[];
@@ -44,10 +52,22 @@ export type Plano = {
   criadoEm: string;
 };
 
-export const DIAS_META = [2, 2, 4, 7];
+const DIAS_META = [2, 2, 4, 7];
+const DIAS_META_FAZER_MAIS = [2, 3, 5, 7];
 
-export function textoMeta(degrau: number, tema: IdTema): string {
-  const livre = temaPorId(tema).livre;
+type FichaDoTema = Pick<Ficha, 'tema' | 'personalizado'>;
+
+export function diasMeta(degrau: number, ficha: FichaDoTema): number {
+  return (temaDaFicha(ficha).fazerMais ? DIAS_META_FAZER_MAIS : DIAS_META)[degrau];
+}
+
+export function textoMeta(degrau: number, ficha: FichaDoTema): string {
+  const tema = temaDaFicha(ficha);
+  if (tema.fazerMais) {
+    const dias = DIAS_META_FAZER_MAIS[degrau];
+    return dias === 7 ? 'Fazer isso todos os dias da semana' : `Fazer isso em ${dias} dias da semana`;
+  }
+  const livre = tema.livre;
   switch (degrau) {
     case 0:
       return '2 dias com menos do que o normal';
@@ -74,7 +94,7 @@ function degrauInicial(f: Frequencia): number {
 }
 
 export function gerarPlano(ficha: Ficha): Plano {
-  const nivel = classificarNivel(ficha.tema, ficha.frequencia, ficha.impacto);
+  const nivel = classificarNivel(temaDaFicha(ficha), ficha.frequencia, ficha.impacto);
   const risco = ficha.seguranca === 'as-vezes' || ficha.seguranca === 'sim-agora';
   return {
     nivel,
@@ -98,7 +118,7 @@ export function ajustarMeta(plano: Plano, cumpriu: boolean): Plano {
 
 // 3 missões do dia: 2 do tema (giram conforme o dia) e 1 do "o que quer cuidar".
 export function missoesDoDia(ficha: Ficha, data = new Date()): Missao[] {
-  const tema = temaPorId(ficha.tema);
+  const tema = temaDaFicha(ficha);
   const dia = Math.floor(data.getTime() / 86400000);
   const i = dia % tema.missoes.length;
   const a = tema.missoes[i];

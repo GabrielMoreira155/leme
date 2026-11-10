@@ -2,10 +2,10 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, Switch, TextInput, View } from 'react-native';
 import { Botao, Cabecalho, Cartao, Chip, Confirmacao, Icone, NomeIcone, Simbolo, Tela, Texto } from '@/components';
-import { temaPorId } from '@/data/temas';
 import { ENERGIA_MAX, nivelXP, useEstado } from '@/lib/estado';
 import { NOME_ROTA } from '@/lib/nivel';
 import { ajustarMeta } from '@/lib/plano';
+import { temaDaFicha } from '@/lib/tema';
 import { cores, espaco, fontes, raio } from '@/theme';
 
 function Linha({ icone, titulo, detalhe, valor, aoMudar }: { icone: NomeIcone; titulo: string; detalhe?: string; valor: boolean; aoMudar: (v: boolean) => void }) {
@@ -54,6 +54,8 @@ export default function Perfil() {
   const [novoPin, setNovoPin] = useState('');
   const [demo, setDemo] = useState(false);
   const [toques, setToques] = useState(0);
+  const [editandoFoco, setEditandoFoco] = useState(false);
+  const [novoFoco, setNovoFoco] = useState('');
   const { ficha, plano } = estado;
   const { nivel } = nivelXP(estado.xp);
 
@@ -81,6 +83,15 @@ export default function Perfil() {
     mostrarAviso('PIN ativado');
   }
 
+  // Edita só o texto exibido ("Foco: ..."). Para mudar o tema, a pessoa refaz a ficha.
+  function salvarFoco() {
+    const texto = novoFoco.trim();
+    if (texto.length < 3) return;
+    atualizar((e) => (e.ficha ? { ...e, ficha: { ...e.ficha, textoOutro: texto } } : e));
+    setEditandoFoco(false);
+    mostrarAviso('Foco atualizado');
+  }
+
   function simularSemana(cumpriu: boolean) {
     atualizar((e) => (e.plano ? { ...e, plano: ajustarMeta(e.plano, cumpriu), semanaAnterior: cumpriu ? 4 : 1 } : e));
     mostrarAviso(cumpriu ? 'Semana cumprida: meta subiu um degrau' : 'Semana puxada: meta desceu um degrau');
@@ -88,12 +99,14 @@ export default function Perfil() {
 
   const guardado = [
     ficha && `Apelido: ${ficha.apelido} · idade ${ficha.faixaIdade}`,
-    ficha && `Tema: ${temaPorId(ficha.tema).nome}`,
+    ficha && `Tema: ${temaDaFicha(ficha).nome}`,
     `${estado.diasCuidados.length} ${estado.diasCuidados.length === 1 ? 'dia cuidado' : 'dias cuidados'} · ${estado.xp} XP`,
     `${estado.humor.length} check-ins de humor · ${estado.tropecos.length} tropeços anotados`,
     `${estado.diario.length} entradas no diário · ${estado.cartas.length} cartas`,
     `${estado.sessoes.length} agendamentos`,
     estado.consentimento && `Consentimento dado em ${new Date(estado.consentimento.em).toLocaleDateString('pt-BR')}`,
+    estado.textosNaoReconhecidos.length > 0 &&
+      `${estado.textosNaoReconhecidos.length} ${estado.textosNaoReconhecidos.length === 1 ? 'texto não reconhecido guardado' : 'textos não reconhecidos guardados'} para melhorar o app`,
   ].filter(Boolean) as string[];
 
   return (
@@ -123,6 +136,40 @@ export default function Perfil() {
             </Texto>
           </View>
         ))}
+        {ficha?.textoOutro !== undefined && (
+          <View style={{ gap: espaco.sm }}>
+            <View style={{ flexDirection: 'row', gap: espaco.sm, alignItems: 'center' }}>
+              <Icone nome="check" size={18} cor={cores.mare} />
+              <Texto v="corpo" style={{ flex: 1, fontSize: 15 }}>
+                Foco, com suas palavras: {ficha.textoOutro}
+              </Texto>
+              {!editandoFoco && (
+                <Botao
+                  titulo="Editar"
+                  variante="fantasma"
+                  acessibilidade="Editar o texto do foco"
+                  onPress={() => {
+                    setNovoFoco(ficha.textoOutro ?? '');
+                    setEditandoFoco(true);
+                  }}
+                  style={{ paddingHorizontal: 8 }}
+                />
+              )}
+            </View>
+            {editandoFoco && (
+              <View style={{ flexDirection: 'row', gap: espaco.sm }}>
+                <TextInput
+                  value={novoFoco}
+                  onChangeText={setNovoFoco}
+                  maxLength={60}
+                  accessibilityLabel="Novo texto do foco"
+                  style={[estilos.campo, { letterSpacing: 0, fontSize: 16 }]}
+                />
+                <Botao titulo="Salvar" variante="oceano" desabilitado={novoFoco.trim().length < 3} onPress={salvarFoco} />
+              </View>
+            )}
+          </View>
+        )}
         <Botao titulo={verDados ? 'Esconder dados completos' : 'Ver dados completos'} variante="fantasma" icone="olho" onPress={() => setVerDados(!verDados)} />
         {verDados && (
           <View style={estilos.json}>

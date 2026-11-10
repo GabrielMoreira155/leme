@@ -18,8 +18,7 @@
  *  - pesado:    convite para conversar com um psicólogo já aparece no plano
  */
 
-import type { IdTema } from '@/data/temas';
-import { temaPorId } from '@/data/temas';
+import type { Tema } from '@/data/temas';
 
 export type Frequencia = 'varias-dia' | 'quase-todo-dia' | 'algumas-semana' | 'fases';
 export type Impacto = 'nao' | 'pouco' | 'bastante';
@@ -30,9 +29,13 @@ export function frequenciaAlta(f: Frequencia): boolean {
   return f === 'varias-dia' || f === 'quase-todo-dia';
 }
 
-export function classificarNivel(tema: IdTema, frequencia: Frequencia, impacto: Impacto): Nivel {
+export function classificarNivel(tema: Pick<Tema, 'pesado' | 'nivelFixo'>, frequencia: Frequencia, impacto: Impacto): Nivel {
+  // Alguns temas têm nível fixo, sem olhar frequência e impacto:
+  // substâncias ilícitas e relação com a comida são sempre "pesado".
+  if (tema.nivelFixo) return tema.nivelFixo;
   // Temas pesados no protótipo: apostas, álcool, cigarro ou vape, pornografia.
-  const pesado = temaPorId(tema).pesado;
+  // O tema personalizado segue a regra dos temas leves.
+  const pesado = tema.pesado;
   const alta = frequenciaAlta(frequencia);
 
   if (pesado) {

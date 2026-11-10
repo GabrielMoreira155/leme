@@ -36,6 +36,9 @@ export default function Apoio() {
       rodape={
         daFicha ? (
           <Botao titulo="Continuar para o meu plano" variante="contorno" onPress={() => router.replace('/plano')} />
+        ) : origem === 'outro' ? (
+          // Veio de um texto de risco no "Outro": o texto não virou hábito; dá para escolher outro tema.
+          <Botao titulo="Voltar e escolher outro tema, se quiser" variante="contorno" onPress={() => voltar('/ficha')} />
         ) : (
           <Botao titulo="Voltar" variante="contorno" onPress={() => voltar()} />
         )

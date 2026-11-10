@@ -3,10 +3,11 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { BarraProgresso, Botao, Cartao, Chip, Icone, Texto, Tuga } from '@/components';
 import { Energia } from '@/components/Energia';
+import { Foco } from '@/components/Foco';
 import { MapaRota } from '@/components/MapaRota';
-import { temaPorId } from '@/data/temas';
 import { diasDaSemana, diasSemanaAnterior, hoje, Humor, nivelXP, temSemanaCompleta, TITULOS_NIVEL, useEstado, XP_POR_NIVEL } from '@/lib/estado';
-import { DIAS_META, MISSAO_RECOMECO, missoesDoDia, textoMeta } from '@/lib/plano';
+import { diasMeta, MISSAO_RECOMECO, missoesDoDia, textoMeta } from '@/lib/plano';
+import { focoDaFicha, temaDaFicha } from '@/lib/tema';
 import { tocarSininho, vibrarSucesso } from '@/lib/som';
 import { cores, espaco, fontes, raio } from '@/theme';
 
@@ -41,13 +42,14 @@ export default function Hoje() {
   const { ficha, plano } = estado;
   if (!ficha || !plano) return <Redirect href="/" />;
 
-  const tema = temaPorId(ficha.tema);
+  const tema = temaDaFicha(ficha);
+  const foco = focoDaFicha(ficha);
   const { nivel, noNivel } = nivelXP(estado.xp);
   const titulo = TITULOS_NIVEL[Math.min(nivel - 1, TITULOS_NIVEL.length - 1)];
   const semana = diasDaSemana();
   const hojeStr = hoje();
   const cuidadosSemana = semana.filter((d) => estado.diasCuidados.includes(d)).length;
-  const meta = DIAS_META[plano.degrau];
+  const meta = diasMeta(plano.degrau, ficha);
 
   const missoes = missoesDoDia(ficha);
   const feitas = estado.missoes.feitas;
@@ -56,7 +58,7 @@ export default function Hoje() {
   const questFeitaHoje = estado.questFeita === hojeStr;
   const quest = QUESTS[Math.floor(Date.now() / 86400000) % QUESTS.length];
   const humorHoje = estado.humor.find((h) => h.data === hojeStr)?.valor;
-  const ganho = tema.ganho.base + tema.ganho.porDia * estado.diasCuidados.length;
+  const ganho = tema.ganho ? tema.ganho.base + tema.ganho.porDia * estado.diasCuidados.length : 0;
 
   function concluirMissao(id: string) {
     if (feitas.includes(id)) return;
@@ -84,6 +86,11 @@ export default function Hoje() {
       <View>
         <Texto v="h1">Oi, {ficha.apelido}</Texto>
         <Texto v="apoio">Um dia de cada vez. Hoje é {NOMES_DIAS[(new Date().getDay() + 6) % 7]}.</Texto>
+        {foco && (
+          <View style={{ marginTop: espaco.sm }}>
+            <Foco texto={foco} />
+          </View>
+        )}
       </View>
 
       {/* Cartão oceano: nível, XP, dias cuidados e energia */}
@@ -179,7 +186,19 @@ export default function Hoje() {
         )}
       </Cartao>
 
-      {/* Meta da semana */}
+      {/* Meta da semana (temas de cuidado, como a relação com a comida, não têm meta de dias livres) */}
+      {tema.semMetas ? (
+        <Cartao tom="turquesa" style={{ gap: espaco.sm }}>
+          <View style={estilos.linha}>
+            <Icone nome="coracao" cor={cores.mare} />
+            <Texto v="h3">Uma rota de cuidado</Texto>
+          </View>
+          <Texto v="corpo" style={{ fontSize: 15 }}>
+            Aqui não tem contagem de dias livres. Cuidar disso fica mais leve com a companhia de um psicólogo, e a primeira conversa é gratuita.
+          </Texto>
+          <Botao titulo="Conhecer as sessões" variante="oceano" onPress={() => router.push('/sessoes')} />
+        </Cartao>
+      ) : (
       <Cartao style={{ gap: espaco.md }}>
         <View style={estilos.linhaEntre}>
           <View style={estilos.linha}>
@@ -188,13 +207,14 @@ export default function Hoje() {
           </View>
           <Texto v="rotulo">PORTO {plano.semana + 1} DE 4</Texto>
         </View>
-        <Texto v="h2">{textoMeta(plano.degrau, ficha.tema)}</Texto>
+        <Texto v="h2">{textoMeta(plano.degrau, ficha)}</Texto>
         <BarraProgresso valor={Math.min(1, cuidadosSemana / meta)} rotulo="Progresso da meta da semana" />
         <Texto v="apoio">
           {Math.min(cuidadosSemana, meta)} de {meta} dias. Cada semana cuidada é uma milha a mais.
         </Texto>
         <MapaRota atual={plano.semana} />
       </Cartao>
+      )}
 
       {/* Missões do dia */}
       <Cartao style={{ gap: espaco.sm }}>
@@ -264,16 +284,18 @@ export default function Hoje() {
       )}
 
       {/* Ganhos reais */}
+      {tema.ganho && (
       <Cartao style={{ gap: espaco.xs }}>
         <Texto v="rotulo">SEUS GANHOS ATÉ AQUI</Texto>
-        <Texto style={estilos.ganho}>{formatarGanho(ganho, tema.ganho.formato)}</Texto>
+        <Texto style={estilos.ganho}>{formatarGanho(ganho, tema.ganho!.formato)}</Texto>
         <Texto v="corpo" style={{ fontSize: 15 }}>
-          {tema.ganho.rotulo}
+          {tema.ganho!.rotulo}
         </Texto>
         <Texto v="apoio" style={{ fontSize: 12 }}>
           Valor simulado no protótipo. Na versão real, você informa a sua média.
         </Texto>
       </Cartao>
+      )}
 
       <Botao titulo="Tive um tropeço" variante="contorno" icone="boia" onPress={() => router.push('/tropeco')} />
       <Texto v="apoio" style={{ textAlign: 'center' }}>

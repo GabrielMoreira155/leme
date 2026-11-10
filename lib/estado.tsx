@@ -31,6 +31,8 @@ export type Estado = {
   cartas: { em: string; abreEm: string; texto: string }[];
   sessoes: { id: string; tipo: string; com: string; horario: string; em: string }[];
   fissurasAtravessadas: number;
+  /** Textos do "Outro" que o app não reconheceu. Só no aparelho e só com o aceite opcional. */
+  textosNaoReconhecidos: { texto: string; em: string }[];
   somLigado: boolean;
   jaRespirou: boolean;
   modoDiscreto: boolean;
@@ -59,6 +61,7 @@ export const ESTADO_INICIAL: Estado = {
   cartas: [],
   sessoes: [],
   fissurasAtravessadas: 0,
+  textosNaoReconhecidos: [],
   somLigado: false, // som desligado por padrão fora da respiração
   jaRespirou: false,
   modoDiscreto: false,
